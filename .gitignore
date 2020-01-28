@@ -1,0 +1,7 @@
+papy_output_zip.zip
+.pydevproject
+.project
+results/
+.DS_Store
+.pyc
+**/__pycache*

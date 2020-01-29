@@ -1,3 +1,4 @@
+*.csv
 papy_output_zip.zip
 .pydevproject
 .project

@@ -1,79 +1,145 @@
 import dash
 import dash_core_components as dcc
 import dash_html_components as html
-from dash.dependencies import Input, Output
+from dash.dependencies import Input, Output, State
+import dash_table
 import pandas as pd
 import numpy as np  
+import base64
+import io
+import datetime
+import plotly.express as px
+import pa
 
 def generate_table(dataframe, max_rows=5):
-    return html.Table(
-        # Header
-        [html.Tr([html.Th(col) for col in dataframe.columns])] +
-        [html.Tr([
-            html.Td(dataframe.iloc[i][col]) for col in dataframe.columns
-        ]) for i in range(min(len(dataframe), max_rows))],
-        style={'margin':'40px'}
-    )
+    if dataframe is not None:
+        return html.Table(
+            # Header
+            [html.Tr([html.Th(col) for col in dataframe.columns])] +
+            [html.Tr([
+                html.Td(dataframe.iloc[i][col]) for col in dataframe.columns
+            ]) for i in range(min(len(dataframe), max_rows))],
+            style={'margin':'40px'}
+        )
+    else:
+         return html.Div('Empty dataframe')
 
-external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
+def parse_contents(contents, filename, date):
+   
+    df = None
+    content_type, content_string = contents.split(',')  
+    decoded = base64.b64decode(content_string) 
+    try:
+        if 'csv' in filename:            
+            df = pd.read_csv(io.StringIO(decoded.decode('utf-8')), header=None)
+        elif 'xls' in filename:          
+            df = pd.read_excel(io.BytesIO(decoded))
+    except Exception as e:
+        return None
+    
+    return df
 
-app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
-df = pd.read_csv("gdplifeexp2007.csv")
+app = dash.Dash(__name__)
+#plotly_df = px.data.gapminder().query("country=='Canada'")
+global_df = None
 
-data_dict = [dict(
-            x=df[df['continent'] == i]['gdp per capita'],
-            y=df[df['continent'] == i]['life expectancy'],
-            text=df[df['continent'] == i]['country'],
-            mode='markers',
-            opacity=0.7,
-            marker={
-                'size': 15,
-                'line': {'width': 0.5, 'color': 'white'}
-            },
-            name=i
-        ) for i in df.continent.unique()
-    ]
-#print(mice)
-app.layout = html.Div(children=[
-        html.H1(children='Power Analysis',
-                    style={
-                        'textAlign':'center'
-                        }
-                    ),
-        html.Div(children=[                    
-            html.Label('Variable range'),
-            dcc.Input(id='id_var_range', value='9-12', type='text'),
+app.layout = html.Div(className='col-sm-12', children=[
+    
+        html.H3('Power Analysis', className='page-header'),
+     
+        html.Div(className="col-sm-6", children=[
             
-            html.Label('Range of sample sizes'),
-            dcc.Input( id='id_var_samples', value='0:100:500'),
-            html.Label('Range of effect sizes'),
-            dcc.Input( id='id_var_effects', value= '0.05:0.05:0.7'),
-            html.Label('Number of repeats'),
-            dcc.Input( id='id_var_repeats', value= '10'),
-            html.Label('0 = classification; 1 = regression; 2 = both'),
-            dcc.Input( id='id_var_analysis', value= '4'),
-            html.Label('Number of cpus'),
-            dcc.Input( id='id_var_cpus', value= '1'),
-            ], style={'columnCount': 3}),
-        
-            html.Br(),        
-            generate_table(df),
-            html.Br(),
+            html.Div(className="panel panel-success", children=[
+                html.Div('Input data file', className="panel-heading"),
+                html.Div(className="panel-body", children=[
+                    html.Div(className="row", children=[
+                        html.Div('Upload data:', className='tablelabel col-xs-3'),
+                        html.Div(className='tablevalue col-xs-5', 
+                                 children=dcc.Upload(id='upload-data', children=html.Div(html.Button('Choose CSV file')))),
+                        html.Div(className='tablelabel col-xs-4', id='output-data-upload')
+                    ]),
+                    html.Div(className='row', children=[
+                        html.Div(className='tablevalue col-xs-12', children=[
+                            dcc.Checklist(id='id_var_analysis',
+                                options=[
+                                    {'label': 'Classification', 'value': 0},
+                                    {'label': 'Regression', 'value': 1}
+                                ],
+                                value=[0,1],
+                                labelStyle={'padding':'10px'}
+                            )  
+                            ])
+                    ]),
+                    html.Div(className='row', children=[
+       
+                        html.Div(className='tablelabel col-xs-12', children=html.Button('Run analysis', className='btn-primary', id='submit-button', n_clicks=0))
+                    ])
+                ])
+            ]),
             
-        dcc.Graph(
-        id='example-graph',
-        figure={
-            'data': data_dict,
-            'layout': dict(
-                xaxis={'type': 'log', 'title': 'GDP Per Capita'},
-                yaxis={'title': 'Life Expectancy'},
-                margin={'l': 40, 'b': 40, 't': 10, 'r': 10},
-                legend={'x': 0, 'y': 1},
-                hovermode='closest'
-            )
-        }
-    )
+            html.Div(id='output-state')
+        ]),
+        html.Div(className="col-sm-6", children=[
+            
+            html.Div(className="panel panel-success", children=[
+                html.Div('Default parameters', className="panel-heading"),
+                html.Div(className="panel-body", children=[
+                    html.Div(className='row', children=[                    
+                        html.Div(className='tablelabel col-xs-5', children='Variable range'),
+                        html.Div(className='tablevalue col-xs-5', children=dcc.Input(id='id_var_range', value='9-12'))
+                    ]),
+                    html.Div(className='row', children=[    
+                        html.Div(className='tablelabel col-xs-5', children='Range of sample sizes'),
+                        html.Div(className='tablevalue col-xs-5', children=dcc.Input( id='id_var_samples', value='0:100:500'))
+                    ]),
+                    html.Div(className='row', children=[ 
+                        html.Div(className='tablelabel col-xs-5', children='Range of effect sizes'),
+                        html.Div(className='tablevalue col-xs-5', children=dcc.Input( id='id_var_effects', value= '0.05:0.05:0.7'))
+                    ]),
+                    html.Div(className='row', children=[ 
+                        html.Div(className='tablelabel col-xs-5', children='Number of repeats'),
+                        html.Div(className='tablevalue col-xs-5', children=dcc.Input( id='id_var_repeats', value= '10'))
+                    ]),
+                    html.Div(className='row', children=[ 
+                        html.Div(className='tablelabel col-xs-5', children='Number of cpus'),
+                        html.Div(className='tablevalue col-xs-5', children=dcc.Input( id='id_var_cpus', value= '1'))
+                    ])
+                ]),
+            ])
+        ]),
+       
+        html.Br(),
+        html.Div(id='show-data-table'),
+        html.Hr()
 ])
+
+@app.callback(Output('output-state', 'children'),
+              [Input('submit-button', 'n_clicks')],
+              [State('id_var_range', 'value'), 
+               State('id_var_samples', 'value'),
+               State('id_var_effects', 'value'),
+               State('id_var_repeats', 'value'),
+               State('id_var_cpus', 'value'),
+               State('id_var_analysis', 'value')
+               ])
+def run_analysis(n_clicks,range,samples,effects,repeats,cpus,analysis):
+    if global_df is None:
+        return html.Div('no data to process')
+    else:
+        print('running main function')
+        pa.main_ui(global_df, ranges, samples, effects, repeats, analysis, cpus)
+
+@app.callback([Output('output-data-upload', 'children'),Output('show-data-table', 'children')],
+              [Input('upload-data', 'contents')],
+              [State('upload-data', 'filename'), State('upload-data', 'last_modified')])
+def load_data_file(contents, file_name, mod_date):
+    children = [ html.Div('An error occurred opening file')]
+    df = None
+    if contents is not None:
+        df = parse_contents(contents, file_name, mod_date)  
+        if df is not None:     
+            children=[html.Div(file_name)]
+    return children, generate_table(df)
 
 if __name__ == '__main__':
     app.run_server(debug=True)

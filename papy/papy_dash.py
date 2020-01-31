@@ -50,13 +50,19 @@ def save_file(contents, file_name, date):
     df.to_csv(new_file)
     return new_file
 
-
+def post_it(error_msg):
+    return  html.Div(className="pull-right post-it yellow", children=[
+                html.Span(error_msg, className="error-message")
+                ])
+     
 app = dash.Dash(__name__)
 #plotly_df = px.data.gapminder().query("country=='Canada'")
 
 app.layout = html.Div(className='col-sm-12', children=[
     
         html.H3('Power Analysis', className='page-header'),
+                   
+                
         dcc.Store(id='store', storage_type='session'),
         html.Div(className="col-sm-6", children=[
             
@@ -116,14 +122,15 @@ app.layout = html.Div(className='col-sm-12', children=[
         ]),       
         html.Br(),
         html.Div(id='show-data-table'),
-        html.Hr()
+        html.Hr(),
+        dcc.Loading(id="loading-1", children=[html.Div(id="output-1")], type="default")
 ])
 
 @app.callback([Output('output-data-upload', 'children'), Output('store', 'data')],
               [Input('upload-data', 'contents')],
               [State('upload-data', 'filename'), State('upload-data', 'last_modified')])
 def load_data_file(contents, file_name, mod_date):
-    children = [ html.Div('No file supplied')]
+    children = [ html.Div(file_name)]
     saved_file = None
     print('loading', file_name)
     if contents is not None and file_name is not None:
@@ -133,7 +140,7 @@ def load_data_file(contents, file_name, mod_date):
         saved_file = save_file(contents, file_name, mod_date)
     return children, saved_file
 
-@app.callback(Output('output-variables', 'children'),
+@app.callback([Output('output-variables', 'children'),Output("output-1", "children")],
               [Input('submit-button', 'n_clicks')],
               [State('id_var_range', 'value'), 
                State('id_var_samples', 'value'),
@@ -147,9 +154,13 @@ def run_analysis(n_clicks,range,samples,effects,repeats,cpus,analysis,data):
     print('running main function with data', data)
     df = None
     if data is not None:
-        df = pd.read_csv(data)
-    return generate_table(df)
-    #pa.main_ui(data, ranges, samples, effects, repeats, analysis, cpus)
+        try:
+            df = pd.read_csv(data)
+            pa.main_ui(df, range, samples, effects, repeats, analysis, cpus)
+        except:
+            return post_it('error')
+    return generate_table(df),''
+    
 
 
 

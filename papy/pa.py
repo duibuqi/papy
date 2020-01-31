@@ -2306,7 +2306,8 @@ def main_ui(argv1, argv2, argv3, argv4, argv5, argv6, argv7):
         argv2 = [int(tmpStr[0]), int(tmpStr[1]) + 1]
     else:
         argv2 = [0, int(argv2)]
-
+    print('arg 2', argv2)
+    
     tmpStr = argv3.split(':')
     argv3 = range(int(tmpStr[0]), int(tmpStr[2]), int(tmpStr[1]))
     
@@ -2314,14 +2315,15 @@ def main_ui(argv1, argv2, argv3, argv4, argv5, argv6, argv7):
     if argv3[0] < 1:
          argv3[0] = 1
     argv3 = np.reshape(argv3, (1, len(argv3)))
-
+    print('arg 3', argv3)
+    
     tmpStr = argv4.split(':')
     argv4 = np.arange(float(tmpStr[0]), float(tmpStr[2]), float(tmpStr[1]))
     if argv4[0] == 0:
         argv4[0] = 0.05
     argv4 = np.array(argv4)
     argv4 = np.reshape(argv4, (1, len(argv4)))
-
+    print('arg 4', argv4)
     sampleSizes = argv3  # np.array([[1, 50, 100, 200, 250, 350, 500, 750, 1000]])
     effectSizes = argv4  # np.array([[0.05, 0.1, 0.15,0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5, 0.55, 0.6, 0.65, 0.7, 0.75, 0.8]])
 
@@ -2329,10 +2331,11 @@ def main_ui(argv1, argv2, argv3, argv4, argv5, argv6, argv7):
     metric_opt = np.array([1, 2, 3, 4])  # see options description below
     correction_opt = np.array([1, 2, 3, 4])  # see correction options description below
 
+    print('arg 5,6,7', argv5, argv6, argv7)
     numberreps = int(argv5)
-    outcome_type = int(argv6)
+    outcome_type = argv6
     cores = int(argv7)
-
+   
     ## ## Calculate for a subset of 4 variables (less than 20 seconds on 4-core desktop for each analysis)
     diffgroups = np.array([])
     linearregression = np.array([])
@@ -2344,14 +2347,15 @@ def main_ui(argv1, argv2, argv3, argv4, argv5, argv6, argv7):
 
     print("num_cols=", num_cols)
     if (num_cols > 0):
-        if (outcome_type == 0 or outcome_type == 2):
+       
+        if (outcome_type[0]==0) or (len(outcome_type)==2):
             print('calling PCalc_2Group')
             diffgroups, output_uncTP_ratio_median, output_bonfTP_ratio_median, output_bhTP_ratio_median, output_byTP_ratio_median, \
             output_uncTP_ratio_iqr, output_bonfTP_ratio_iqr, output_bhTP_ratio_iqr, output_byTP_ratio_iqr, \
             output_uncTP, output_bonfTP, output_bhTP, output_byTP \
                 = PCalc_2Group(XSRV[:, np.arange(int(argv2[0]), int(argv2[1]))], effectSizes, sampleSizes, 0.05, 5000,
                                numberreps, cores)
-        if (outcome_type == 1 or outcome_type == 2):
+        if (outcome_type[0] == 1 or len(outcome_type) == 2):
             print('calling PCalc_Continuous')
             linearregression, output_uncTP_ratio_median_ln, output_bonfTP_ratio_median_ln, output_bhTP_ratio_median_ln, output_byTP_ratio_median_ln, \
             output_uncTP_ratio_iqr_ln, output_bonfTP_ratio_iqr_ln, output_bhTP_ratio_iqr_ln, output_byTP_ratio_iqr_ln, \
@@ -2363,12 +2367,12 @@ def main_ui(argv1, argv2, argv3, argv4, argv5, argv6, argv7):
 
     else:
         t_start = datetime.now()
-        if (outcome_type == 0 or outcome_type == 2):
+        if (outcome_type[0]==0) or (len(outcome_type)==2):
             diffgroups, output_uncTP_ratio_median, output_bonfTP_ratio_median, output_bhTP_ratio_median, output_byTP_ratio_median, \
             output_uncTP_ratio_iqr, output_bonfTP_ratio_iqr, output_bhTP_ratio_iqr, output_byTP_ratio_iqr, \
             output_uncTP, output_bonfTP, output_bhTP, output_byTP \
                 = PCalc_2Group(XSRV, effectSizes, sampleSizes, 0.05, 5000, numberreps, cores)
-        if (outcome_type == 1 or outcome_type == 2):
+        if (outcome_type[0] == 1 or len(outcome_type) == 2):
             linearregression, output_uncTP_ratio_median_ln, output_bonfTP_ratio_median_ln, output_bhTP_ratio_median_ln, output_byTP_ratio_median_ln, \
             output_uncTP_ratio_iqr_ln, output_bonfTP_ratio_iqr_ln, output_bhTP_ratio_iqr_ln, output_byTP_ratio_iqr_ln, \
             output_uncTP, output_bonfTP, output_bhTP, output_byTP \

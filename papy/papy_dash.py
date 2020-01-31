@@ -75,18 +75,17 @@ app.layout = html.Div(className='col-sm-12', children=[
                         html.Div(className='tablelabel col-xs-4', id='output-data-upload')
                     ]),
                     html.Div(className='row', children=[
-                        html.Div(className='tablevalue col-xs-12', children=[
-                            html.Div('Analysis type', className='tablelabel col-xs-3'),
-                            html.Div(className='tablevalue col-xs-9', children=[
-                                dcc.Checklist(id='id_var_analysis',
-                                options=[
-                                    {'label': 'Classification', 'value': 0},
-                                    {'label': 'Regression', 'value': 1}
-                                ],
-                                value=[0,1],
-                                labelStyle={'padding':'10px'}
-                            )  
-                            ])
+
+                        html.Div('Analysis type', className='tablelabel col-xs-3'),
+                        html.Div(className='tablevalue col-xs-9', children=[
+                            dcc.Checklist(id='id_var_analysis',
+                            options=[
+                                {'label': 'Classification', 'value': 0},
+                                {'label': 'Regression', 'value': 1}
+                            ],
+                            value=[0,1],
+                            labelStyle={'padding':'10px'}
+                        )  
                         ])
                     ]),
                     html.Div(className='row', children=[      

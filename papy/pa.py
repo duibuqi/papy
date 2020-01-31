@@ -2334,6 +2334,12 @@ def main_ui(argv1, argv2, argv3, argv4, argv5, argv6, argv7):
     print('arg 5,6,7', argv5, argv6, argv7)
     numberreps = int(argv5)
     outcome_type = argv6
+    if len(outcome_type) == 2:
+        outcome_type = 2
+    elif outcome_type[0]==0:
+        outcome_type==0
+    else:
+        outcome_type==1
     cores = int(argv7)
    
     ## ## Calculate for a subset of 4 variables (less than 20 seconds on 4-core desktop for each analysis)
@@ -2347,15 +2353,14 @@ def main_ui(argv1, argv2, argv3, argv4, argv5, argv6, argv7):
 
     print("num_cols=", num_cols)
     if (num_cols > 0):
-       
-        if (outcome_type[0]==0) or (len(outcome_type)==2):
+        if (outcome_type == 0 or outcome_type == 2):
             print('calling PCalc_2Group')
             diffgroups, output_uncTP_ratio_median, output_bonfTP_ratio_median, output_bhTP_ratio_median, output_byTP_ratio_median, \
             output_uncTP_ratio_iqr, output_bonfTP_ratio_iqr, output_bhTP_ratio_iqr, output_byTP_ratio_iqr, \
             output_uncTP, output_bonfTP, output_bhTP, output_byTP \
                 = PCalc_2Group(XSRV[:, np.arange(int(argv2[0]), int(argv2[1]))], effectSizes, sampleSizes, 0.05, 5000,
                                numberreps, cores)
-        if (outcome_type[0] == 1 or len(outcome_type) == 2):
+        if (outcome_type == 1 or outcome_type == 2):
             print('calling PCalc_Continuous')
             linearregression, output_uncTP_ratio_median_ln, output_bonfTP_ratio_median_ln, output_bhTP_ratio_median_ln, output_byTP_ratio_median_ln, \
             output_uncTP_ratio_iqr_ln, output_bonfTP_ratio_iqr_ln, output_bhTP_ratio_iqr_ln, output_byTP_ratio_iqr_ln, \
@@ -2367,12 +2372,12 @@ def main_ui(argv1, argv2, argv3, argv4, argv5, argv6, argv7):
 
     else:
         t_start = datetime.now()
-        if (outcome_type[0]==0) or (len(outcome_type)==2):
+        if (outcome_type == 0 or outcome_type == 2):
             diffgroups, output_uncTP_ratio_median, output_bonfTP_ratio_median, output_bhTP_ratio_median, output_byTP_ratio_median, \
             output_uncTP_ratio_iqr, output_bonfTP_ratio_iqr, output_bhTP_ratio_iqr, output_byTP_ratio_iqr, \
             output_uncTP, output_bonfTP, output_bhTP, output_byTP \
                 = PCalc_2Group(XSRV, effectSizes, sampleSizes, 0.05, 5000, numberreps, cores)
-        if (outcome_type[0] == 1 or len(outcome_type) == 2):
+        if (outcome_type == 1 or outcome_type == 2):
             linearregression, output_uncTP_ratio_median_ln, output_bonfTP_ratio_median_ln, output_bhTP_ratio_median_ln, output_byTP_ratio_median_ln, \
             output_uncTP_ratio_iqr_ln, output_bonfTP_ratio_iqr_ln, output_bhTP_ratio_iqr_ln, output_byTP_ratio_iqr_ln, \
             output_uncTP, output_bonfTP, output_bhTP, output_byTP \

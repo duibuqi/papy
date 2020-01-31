@@ -25,7 +25,7 @@ def generate_table(dataframe, max_rows=5):
             style={'margin':'40px'}
         )
     else:
-         return html.Div('Empty dataframe')
+         return html.Div('No data available')
 
 def save_file(contents, file_name, date):
    
@@ -70,13 +70,15 @@ app.layout = html.Div(className='col-sm-12', children=[
                 html.Div('Input data file', className="panel-heading"),
                 html.Div(className="panel-body", children=[
                     html.Div(className="row", children=[
-                        html.Div('Upload data:', className='tablelabel col-xs-3'),
+                        html.Div('Upload data', className='tablelabel col-xs-3'),
                         html.Div(className='tablevalue col-xs-5', children=dcc.Upload(id='upload-data', children=html.Div(html.Button('Choose CSV file')))),
                         html.Div(className='tablelabel col-xs-4', id='output-data-upload')
                     ]),
                     html.Div(className='row', children=[
                         html.Div(className='tablevalue col-xs-12', children=[
-                            dcc.Checklist(id='id_var_analysis',
+                            html.Div('Analysis type', className='tablelabel col-xs-3'),
+                            html.Div(className='tablevalue col-xs-9', children=[
+                                dcc.Checklist(id='id_var_analysis',
                                 options=[
                                     {'label': 'Classification', 'value': 0},
                                     {'label': 'Regression', 'value': 1}
@@ -85,6 +87,7 @@ app.layout = html.Div(className='col-sm-12', children=[
                                 labelStyle={'padding':'10px'}
                             )  
                             ])
+                        ])
                     ]),
                     html.Div(className='row', children=[      
                         html.Div(className='tablelabel col-xs-12', children=html.Button('Run analysis', className='btn-primary', id='submit-button', n_clicks=0))
@@ -123,7 +126,7 @@ app.layout = html.Div(className='col-sm-12', children=[
         html.Br(),
         html.Div(id='show-data-table'),
         html.Hr(),
-        dcc.Loading(id="loading-1", children=[html.Div(id="output-1")], type="default")
+        dcc.Loading(id="loading-1", children=[html.Div(id="pretty-spinner")], type="default")
 ])
 
 @app.callback([Output('output-data-upload', 'children'), Output('store', 'data')],
@@ -140,7 +143,7 @@ def load_data_file(contents, file_name, mod_date):
         saved_file = save_file(contents, file_name, mod_date)
     return children, saved_file
 
-@app.callback([Output('output-variables', 'children'),Output("output-1", "children")],
+@app.callback([Output('output-variables', 'children'),Output("pretty-spinner", "children")],
               [Input('submit-button', 'n_clicks')],
               [State('id_var_range', 'value'), 
                State('id_var_samples', 'value'),
@@ -153,13 +156,17 @@ def load_data_file(contents, file_name, mod_date):
 def run_analysis(n_clicks,range,samples,effects,repeats,cpus,analysis,data):
     print('running main function with data', data)
     df = None
-    if data is not None:
-        try:
-            df = pd.read_csv(data)
-            pa.main_ui(df, range, samples, effects, repeats, analysis, cpus)
-        except:
-            return post_it('error')
+    if data is None:
+        return html.Div('Please upload a csv data file to begin'), ''
+    if len(analysis)==0:
+        return html.Div('Please choose analysis type(s)'), ''
+    try:
+        df = pd.read_csv(data)
+        pa.main_ui(df, range, samples, effects, repeats, analysis, cpus)
+    except Exception as e:
+        return post_it(str(e)), ''
     return generate_table(df),''
+   
     
 
 

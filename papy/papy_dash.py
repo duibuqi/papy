@@ -11,6 +11,7 @@ import os
 import datetime
 import plotly.express as px
 import pa
+import shutil
 
 UPLOAD_DIRECTORY = 'user/'
 
@@ -40,7 +41,7 @@ def save_file(contents, file_name, date):
     except Exception as e:
         return None
     print('saving file', file_name)
-    user_dir_path = os.path.join(UPLOAD_DIRECTORY, str(int(datetime.datetime.now().timestamp())) )
+    user_dir_path = os.path.join(UPLOAD_DIRECTORY, str(datetime.datetime.now().timestamp()) )
     if not os.path.exists(user_dir_path):
         print('making directory', user_dir_path)
         os.makedirs(user_dir_path)
@@ -89,7 +90,12 @@ app.layout = html.Div(className='col-sm-12', children=[
                         ])
                     ]),
                     html.Div(className='row', children=[      
-                        html.Div(className='tablelabel col-xs-12', children=html.Button('Run analysis', className='btn-primary', id='submit-button', n_clicks=0))
+                        html.Div(className='tablelabel col-xs-12', 
+                                 children=html.Button('Run analysis', className='btn-primary', id='submit-button', n_clicks=0))
+                    ]),
+                    html.Div(className='row', children=[
+                        html.Div(className='tablelabel col-xs-12', 
+                                 children=html.A('Download results', id='download-zip', download="papy_output_zip.zip",href="",target="_blank",n_clicks = 0 ))
                     ])
                 ])
             ]),          
@@ -128,13 +134,23 @@ app.layout = html.Div(className='col-sm-12', children=[
         dcc.Loading(id="loading-1", children=[html.Div(id="pretty-spinner")], type="default")
 ])
 
+@app.callback(
+    Output('download-zip', 'href'),
+    [Input('download-zip', 'n_clicks')])
+def generate_report_url(n_clicks):
+    return '/dash/download'
+
+@app.server.route('/dash/download')
+def generate_report_url():
+    return send_file('papy_output_zip.zip', attachment_filename = ' papy_output_zip.zip', as_attachment = True)
+
 @app.callback([Output('output-data-upload', 'children'), Output('store', 'data')],
               [Input('upload-data', 'contents')],
               [State('upload-data', 'filename'), State('upload-data', 'last_modified')])
 def load_data_file(contents, file_name, mod_date):
     children = [ html.Div(file_name)]
     saved_file = None
-    print('loading', file_name)
+    print('in load_data_file with', file_name)
     if contents is not None and file_name is not None:
         #df = parse_contents(contents, file_name, mod_date)    
         children=[html.Div(file_name)]
@@ -161,14 +177,16 @@ def run_analysis(n_clicks,range,samples,effects,repeats,cpus,analysis,data):
         return html.Div('Please choose analysis type(s)'), ''
     try:
         df = pd.read_csv(data)
+        #x = threading.Thread(target= pa.main_ui, args=(df, range, samples, effects, repeats, analysis, cpus))
         pa.main_ui(df, range, samples, effects, repeats, analysis, cpus)
+        data_dir = os.path.dirname(data)
+        print('about to remove input', data_dir)
+        shutil.rmtree(data_dir)
+        
     except Exception as e:
         return post_it(str(e)), ''
     return generate_table(df),''
    
-    
-
-
 
 if __name__ == '__main__':
     app.run_server(debug=True)

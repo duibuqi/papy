@@ -2334,12 +2334,11 @@ def main_ui(argv1, argv2, argv3, argv4, argv5, argv6, argv7):
     print('arg 5,6,7', argv5, argv6, argv7)
     numberreps = int(argv5)
     outcome_type = argv6
+    # outcome type is a list of options in the UI version
     if len(outcome_type) == 2:
         outcome_type = 2
-    elif outcome_type[0]==0:
-        outcome_type==0
     else:
-        outcome_type==1
+        outcome_type=outcome_type[0]
     cores = int(argv7)
    
     ## ## Calculate for a subset of 4 variables (less than 20 seconds on 4-core desktop for each analysis)
@@ -2351,17 +2350,17 @@ def main_ui(argv1, argv2, argv3, argv4, argv5, argv6, argv7):
     if (num_cols < cores):
         cores = num_cols
 
-    print("num_cols=", num_cols)
+
     if (num_cols > 0):
         if (outcome_type == 0 or outcome_type == 2):
-            print('calling PCalc_2Group')
+            print('1 - calling PCalc_2Group')
             diffgroups, output_uncTP_ratio_median, output_bonfTP_ratio_median, output_bhTP_ratio_median, output_byTP_ratio_median, \
             output_uncTP_ratio_iqr, output_bonfTP_ratio_iqr, output_bhTP_ratio_iqr, output_byTP_ratio_iqr, \
             output_uncTP, output_bonfTP, output_bhTP, output_byTP \
                 = PCalc_2Group(XSRV[:, np.arange(int(argv2[0]), int(argv2[1]))], effectSizes, sampleSizes, 0.05, 5000,
                                numberreps, cores)
         if (outcome_type == 1 or outcome_type == 2):
-            print('calling PCalc_Continuous')
+            print('1 - calling PCalc_Continuous')
             linearregression, output_uncTP_ratio_median_ln, output_bonfTP_ratio_median_ln, output_bhTP_ratio_median_ln, output_byTP_ratio_median_ln, \
             output_uncTP_ratio_iqr_ln, output_bonfTP_ratio_iqr_ln, output_bhTP_ratio_iqr_ln, output_byTP_ratio_iqr_ln, \
                     output_uncTP, output_bonfTP, output_bhTP, output_byTP \
@@ -2373,11 +2372,13 @@ def main_ui(argv1, argv2, argv3, argv4, argv5, argv6, argv7):
     else:
         t_start = datetime.now()
         if (outcome_type == 0 or outcome_type == 2):
+            print('2 - calling PCalc_2Group')
             diffgroups, output_uncTP_ratio_median, output_bonfTP_ratio_median, output_bhTP_ratio_median, output_byTP_ratio_median, \
             output_uncTP_ratio_iqr, output_bonfTP_ratio_iqr, output_bhTP_ratio_iqr, output_byTP_ratio_iqr, \
             output_uncTP, output_bonfTP, output_bhTP, output_byTP \
                 = PCalc_2Group(XSRV, effectSizes, sampleSizes, 0.05, 5000, numberreps, cores)
         if (outcome_type == 1 or outcome_type == 2):
+            print('2 - calling PCalc_Continuous')
             linearregression, output_uncTP_ratio_median_ln, output_bonfTP_ratio_median_ln, output_bhTP_ratio_median_ln, output_byTP_ratio_median_ln, \
             output_uncTP_ratio_iqr_ln, output_bonfTP_ratio_iqr_ln, output_bhTP_ratio_iqr_ln, output_byTP_ratio_iqr_ln, \
             output_uncTP, output_bonfTP, output_bhTP, output_byTP \
@@ -2429,18 +2430,17 @@ def main_ui(argv1, argv2, argv3, argv4, argv5, argv6, argv7):
     np.savetxt(file_handle, np.array(['sample sizes']), fmt='%s')
     np.savetxt(file_handle, sampleSizes, delimiter=",", fmt='%.3f')
     file_handle.close()
-
+    print('written to file effect_n_sample_sizes.txt')
     ##save files. jj- Metric options; kk- Correction options; ii- Variable number; for example: jj=1, kk=1 mean tpn-- true positive no correction.
     print('sv_filenames', sv_filenames)
     for jj in range(0, sv_filenames.shape[0]):
         for kk in range(0, sv_filenames.shape[1]):
-            # if (jj==2 and kk > 0):
-            #    break;
-            # if (jj==4 and kk > 0):
-            #    break;
+
             if (outcome_type == 0 or outcome_type == 2):
-                file_handle = open('papy_output/diffgroups-%s.csv' % (sv_filenames[jj][kk]), 'a')
-                print('opening file diffgroups-xx')
+                t = 'papy_output/diffgroups-%s.csv' % (sv_filenames[jj][kk])
+                print('making csv file', t)
+                file_handle = open(t, 'a')
+               
                 ##write the title line with columns "variables, Sample Sizes (Effect Sizes as columns), and Effect Sizes"
                 title_str = np.append(np.array([['Variables', 'Effect Sizes (Sample Sizes in Columns)']]),
                                       sampleSizes.astype('str'), axis=1)
@@ -2455,8 +2455,10 @@ def main_ui(argv1, argv2, argv3, argv4, argv5, argv6, argv7):
                                delimiter=",", fmt='%.5f')
                 file_handle.close()
             if (outcome_type == 1 or outcome_type == 2):
-                file_handle = open('papy_output/linearregression-%s.csv' % (sv_filenames[jj][kk]), 'a')
-                print('opening file linearregression-xx')
+                t = 'papy_output/linearregression-%s.csv' % (sv_filenames[jj][kk])
+                print('making csv file', t)
+                file_handle = open(t, 'a')
+               
                 ##write the title line with columns "variables, Sample Sizes (Effect Sizes as columns), and Effect Sizes"
                 title_str = np.append(np.array([['Variables', 'Effect Sizes (Sample Sizes in Columns)']]),
                                       sampleSizes.astype('str'), axis=1)
@@ -2473,7 +2475,7 @@ def main_ui(argv1, argv2, argv3, argv4, argv5, argv6, argv7):
                 file_handle.close()
 
     if (outcome_type == 0 or outcome_type == 2):
-        print('doing some plotting')
+        print('1 - Making html files with some plotting')
         ##plot the surfaces of power rate acrossing the combination of effectSize and SampleSize (classfied)
         iSurfacePlotTPR(output_uncTP_ratio_median, 'papy_output/plot-power-rate-noCorrection-diffgroups.html',
                         'no correction', sampleSizes, effectSizes, numberreps)
@@ -2569,7 +2571,9 @@ def main_ui(argv1, argv2, argv3, argv4, argv5, argv6, argv7):
                     'papy_output/plot-slice-power-rate-byCorrection-diffgroups-eff.html', \
                     'Proportion of Variables with Power (True Positive)> 0.8', \
                     'Effect Size', 'tpby', 'Sample Size=', sampleSizes[:, slice_cols])
+        
     if (outcome_type == 1 or outcome_type == 2):
+        print('2 - Making html files with some plotting')
         ##plot the surfaces of power rate acrossing the combination of effectSize and SampleSize (linear regression)
         iSurfacePlotTPR(output_uncTP_ratio_median_ln, 'papy_output/plot-power-rate-noCorrection-linearregression.html',
                         'no correction', sampleSizes, effectSizes, numberreps)
@@ -2667,22 +2671,13 @@ def main_ui(argv1, argv2, argv3, argv4, argv5, argv6, argv7):
                     'papy_output/plot-slice-power-rate-byCorrection-ln-eff.html', \
                     'Proportion of Variables with Power (True Positive)> 0.8 (linear-regression)', \
                     'Effect Size', 'tpby', 'Sample Size=', sampleSizes[:, slice_cols])
-        ##plot all surfac of True Positive
-        ## sv_name1=np.array([['tpn', 'tpb', 'tpbh', 'tpby']])
-        ## for ii in range(0, num_cols):
-        ## for jj in range(0, sv_name1.shape[1]):
-        ## ##print ii, jj, kk
-        ## iSurfacePlot(diffgroups, 'papy_output/plot-variable%d-diffgroups-%s.html'%(ii+1,sv_name1[0][jj]), ii+1,  10, jj+1,sampleSizes, effectSizes,numberreps)
-
+  
     ##save and plot surface of mean of each variable;
     ##sv_filenames.shape[0] is the dimension of metric options;
     ##sv_filenames.shape[1] is the dimension of correction options
     for jj in range(0, sv_filenames.shape[0]):
         for kk in range(0, sv_filenames.shape[1]):
-            # if (jj==2 and kk > 0):
-            #    break;
-            # if (jj==4 and kk > 0):
-            #    break;
+
             if (outcome_type == 0 or outcome_type == 2):
                 temp_diffgroups_array = []
                 mean_diffgroups_array = []
@@ -2700,8 +2695,10 @@ def main_ui(argv1, argv2, argv3, argv4, argv5, argv6, argv7):
                 mean_diffgroups_array = np.mean(temp_diffgroups_array, axis=0)
                 # for calculating standard deviation
                 std_diffgroups_array = np.std(temp_diffgroups_array, axis=0)
-
-                file_handle = open('papy_output/mean-diffgroups-%s.csv' % (sv_filenames[jj][kk]), 'a')
+                print('1 - Making html files with some plotting')
+                t = 'papy_output/mean-diffgroups-%s.csv' % (sv_filenames[jj][kk])
+                print('making file', t)
+                file_handle = open(t, 'a')
                 np.savetxt(file_handle, mean_diffgroups_array, delimiter=",", fmt='%.10f')
                 file_handle.close()
 
@@ -2710,8 +2707,9 @@ def main_ui(argv1, argv2, argv3, argv4, argv5, argv6, argv7):
                 mean_linearregression_array = np.mean(temp_linearregression_array, axis=0)
                 # for calculating standard deviation
                 std_linearregression_array = np.std(temp_linearregression_array, axis=0)
-
-                file_handle = open('papy_output/mean-linearregression-%s.csv' % (sv_filenames[jj][kk]), 'a')
+                t = 'papy_output/mean-linearregression-%s.csv' % (sv_filenames[jj][kk])
+                print('making file', t)
+                file_handle = open(t, 'a')
                 np.savetxt(file_handle, mean_linearregression_array, delimiter=",", fmt='%.10f')
                 file_handle.close()
 
@@ -2732,10 +2730,6 @@ def main_ui(argv1, argv2, argv3, argv4, argv5, argv6, argv7):
                              'papy_output/plot-mean-linearregression-%s.html' % (sv_filenames[jj][kk]), 1, 1, 1,
                              sampleSizes, effectSizes, numberreps)
 
-    ##copy plotSurface.py to papy_output folder
-    ##for plotting interactive surface plots for the variables separately
-    # shutil.copy2('plotSurface.py','papy_output')
-    ##create a zip file on the output folder
     shutil.make_archive('papy_output_zip', 'zip', 'papy_output')
 
     ##copy some files for user viewing in results folder

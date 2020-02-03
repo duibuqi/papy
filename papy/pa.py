@@ -2285,8 +2285,9 @@ if __name__ == "__main__":
 Modifications to main function to support web ui
 '''    
 
-def main_ui(argv1, argv2, argv3, argv4, argv5, argv6, argv7):
+def main_ui(argv1, argv2, argv3, argv4, argv5, argv6, argv7, results_dir):
     ## read the data into an array;
+    print("Results directory is", results_dir)
     XSRV = argv1
     print(type(XSRV))
     if (type(XSRV).__name__ != 'ndarray'):
@@ -2414,9 +2415,11 @@ def main_ui(argv1, argv2, argv3, argv4, argv5, argv6, argv7):
     ##write diffgroups and linearregression into file for testing purpose
     ##np.savetxt('diffgroups.csv',diffgroups[1][3][1], delimiter=",")
     ##np.savetxt('linearregression.csv',linearregression[1][3][1], delimiter=",")
-    if not os.path.exists('papy_output'):
-        os.makedirs('papy_output')
-
+    output_folder = os.path.join(results_dir, 'papy_output')
+    if not os.path.exists(output_folder):
+        os.makedirs(output_folder)
+        
+    print("output_folder is", output_folder)
     ##file names matrix
     sv_filenames = np.array([['fpn', 'fpb', 'fpbh', 'fpby'], ['tnn', 'tnb', 'tnbh', 'tnby'], \
                              ['fdn', 'fdb', 'fdbh', 'fdby'], ['fnn', 'fnb', 'fnbh', 'fnby'], \
@@ -2424,7 +2427,7 @@ def main_ui(argv1, argv2, argv3, argv4, argv5, argv6, argv7):
                              ['stnn', 'stnb', 'stnbh', 'stnby'], ['sfnn', 'sfnb', 'sfnbh', 'sfnby'], \
                              ['sfpn', 'sfpb', 'sfpbh', 'sfpby'], ['tpn', 'tpb', 'tpbh', 'tpby']])
     ##save the effect sizes and sample sizes
-    file_handle = open('papy_output/effect_n_sample_sizes.txt', 'a')
+    file_handle = open(output_folder + '/effect_n_sample_sizes.txt', 'a')
     np.savetxt(file_handle, np.array(['effect sizes']), fmt='%s')
     np.savetxt(file_handle, effectSizes, delimiter=",", fmt='%.3f')
     np.savetxt(file_handle, np.array(['sample sizes']), fmt='%s')
@@ -2437,7 +2440,7 @@ def main_ui(argv1, argv2, argv3, argv4, argv5, argv6, argv7):
         for kk in range(0, sv_filenames.shape[1]):
 
             if (outcome_type == 0 or outcome_type == 2):
-                t = 'papy_output/diffgroups-%s.csv' % (sv_filenames[jj][kk])
+                t = output_folder + '/diffgroups-%s.csv' % (sv_filenames[jj][kk])
                 print('making csv file', t)
                 file_handle = open(t, 'a')
                
@@ -2455,7 +2458,7 @@ def main_ui(argv1, argv2, argv3, argv4, argv5, argv6, argv7):
                                delimiter=",", fmt='%.5f')
                 file_handle.close()
             if (outcome_type == 1 or outcome_type == 2):
-                t = 'papy_output/linearregression-%s.csv' % (sv_filenames[jj][kk])
+                t = output_folder + '/linearregression-%s.csv' % (sv_filenames[jj][kk])
                 print('making csv file', t)
                 file_handle = open(t, 'a')
                
@@ -2477,13 +2480,13 @@ def main_ui(argv1, argv2, argv3, argv4, argv5, argv6, argv7):
     if (outcome_type == 0 or outcome_type == 2):
         print('1 - Making html files with some plotting')
         ##plot the surfaces of power rate acrossing the combination of effectSize and SampleSize (classfied)
-        iSurfacePlotTPR(output_uncTP_ratio_median, 'papy_output/plot-power-rate-noCorrection-diffgroups.html',
+        iSurfacePlotTPR(output_uncTP_ratio_median, output_folder + '/plot-power-rate-noCorrection-diffgroups.html',
                         'no correction', sampleSizes, effectSizes, numberreps)
-        iSurfacePlotTPR(output_bonfTP_ratio_median, 'papy_output/plot-power-rate-bonfCorrection-diffgroups.html',
+        iSurfacePlotTPR(output_bonfTP_ratio_median, output_folder + '/plot-power-rate-bonfCorrection-diffgroups.html',
                         'Bonferroni correction', sampleSizes, effectSizes, numberreps)
-        iSurfacePlotTPR(output_bhTP_ratio_median, 'papy_output/plot-power-rate-bhCorrection-diffgroups.html',
+        iSurfacePlotTPR(output_bhTP_ratio_median, output_folder + '/plot-power-rate-bhCorrection-diffgroups.html',
                         'Benjamini-Hochberg correction', sampleSizes, effectSizes, numberreps)
-        iSurfacePlotTPR(output_byTP_ratio_median, 'papy_output/plot-power-rate-byCorrection-diffgroups.html',
+        iSurfacePlotTPR(output_byTP_ratio_median, output_folder + '/plot-power-rate-byCorrection-diffgroups.html',
                         'Benjamini-Yekutieli correction', sampleSizes, effectSizes, numberreps)
 
         ##plot the slice of surfaces power rate; x-axis is based on sample size (columns)
@@ -2495,7 +2498,7 @@ def main_ui(argv1, argv2, argv3, argv4, argv5, argv6, argv7):
             Y_temp.append(output_uncTP_ratio_median[ll, :])
             Y_std_temp.append(output_uncTP_ratio_iqr[ll, :])
         iSlicesPlot(sampleSizes[0], Y_temp, Y_std_temp, \
-                    'papy_output/plot-slice-power-rate-noCorrection-diffgroups.html', \
+                    output_folder + '/plot-slice-power-rate-noCorrection-diffgroups.html', \
                     'Proportion of Variables with Power (True Positive)> 0.8', \
                     'Sample Size', 'tpn', 'Effect Size=', effectSizes[:, slice_rows])
 
@@ -2505,7 +2508,7 @@ def main_ui(argv1, argv2, argv3, argv4, argv5, argv6, argv7):
             Y_temp.append(output_bonfTP_ratio_median[ll, :])
             Y_std_temp.append(output_bonfTP_ratio_iqr[ll, :])
         iSlicesPlot(sampleSizes[0], Y_temp, Y_std_temp, \
-                    'papy_output/plot-slice-power-rate-bonfCorrection-diffgroups.html', \
+                    output_folder + '/plot-slice-power-rate-bonfCorrection-diffgroups.html', \
                     'Proportion of Variables with Power (True Positive)> 0.8', \
                     'Sample Size', 'tpb', 'Effect Size=', effectSizes[:, slice_rows])
 
@@ -2515,7 +2518,7 @@ def main_ui(argv1, argv2, argv3, argv4, argv5, argv6, argv7):
             Y_temp.append(output_bhTP_ratio_median[ll, :])
             Y_std_temp.append(output_bhTP_ratio_iqr[ll, :])
         iSlicesPlot(sampleSizes[0], Y_temp, Y_std_temp, \
-                    'papy_output/plot-slice-power-rate-bhCorrection-diffgroups.html', \
+                    output_folder + '/plot-slice-power-rate-bhCorrection-diffgroups.html', \
                     'Proportion of Variables with Power (True Positive)> 0.8', \
                     'Sample Size', 'tpbh', 'Effect Size=', effectSizes[:, slice_rows])
 
@@ -2525,7 +2528,7 @@ def main_ui(argv1, argv2, argv3, argv4, argv5, argv6, argv7):
             Y_temp.append(output_byTP_ratio_median[ll, :])
             Y_std_temp.append(output_byTP_ratio_iqr[ll, :])
         iSlicesPlot(sampleSizes[0], Y_temp, Y_std_temp, \
-                    'papy_output/plot-slice-power-rate-byCorrection-diffgroups.html', \
+                    output_folder + '/plot-slice-power-rate-byCorrection-diffgroups.html', \
                     'Proportion of Variables with Power (True Positive)> 0.8', \
                     'Sample Size', 'tpby', 'Effect Size=', effectSizes[:, slice_rows])
 
@@ -2538,7 +2541,7 @@ def main_ui(argv1, argv2, argv3, argv4, argv5, argv6, argv7):
             Y_temp.append(output_uncTP_ratio_median[:, ll])
             Y_std_temp.append(output_uncTP_ratio_iqr[:, ll])
         iSlicesPlot(effectSizes[0], Y_temp, Y_std_temp, \
-                    'papy_output/plot-slice-power-rate-noCorrection-diffgroups-eff.html', \
+                    output_folder + '/plot-slice-power-rate-noCorrection-diffgroups-eff.html', \
                     'Proportion of Variables with Power (True Positive)> 0.8', \
                     'Effect Size', 'tpn', 'Sample Size=', sampleSizes[:, slice_cols])
 
@@ -2548,7 +2551,7 @@ def main_ui(argv1, argv2, argv3, argv4, argv5, argv6, argv7):
             Y_temp.append(output_bonfTP_ratio_median[:, ll])
             Y_std_temp.append(output_bonfTP_ratio_iqr[:, ll])
         iSlicesPlot(effectSizes[0], Y_temp, Y_std_temp, \
-                    'papy_output/plot-slice-power-rate-bonfCorrection-diffgroups-eff.html', \
+                    output_folder + '/plot-slice-power-rate-bonfCorrection-diffgroups-eff.html', \
                     'Proportion of Variables with Power (True Positive)> 0.8', \
                     'Effect Size', 'tpb', 'Sample Size=', sampleSizes[:, slice_cols])
 
@@ -2558,7 +2561,7 @@ def main_ui(argv1, argv2, argv3, argv4, argv5, argv6, argv7):
             Y_temp.append(output_bhTP_ratio_median[:, ll])
             Y_std_temp.append(output_bhTP_ratio_iqr[:, ll])
         iSlicesPlot(effectSizes[0], Y_temp, Y_std_temp, \
-                    'papy_output/plot-slice-power-rate-bhCorrection-diffgroups-eff.html', \
+                    output_folder + '/plot-slice-power-rate-bhCorrection-diffgroups-eff.html', \
                     'Proportion of Variables with Power (True Positive)> 0.8', \
                     'Effect Size', 'tpbh', 'Sample Size=', sampleSizes[:, slice_cols])
 
@@ -2568,21 +2571,21 @@ def main_ui(argv1, argv2, argv3, argv4, argv5, argv6, argv7):
             Y_temp.append(output_byTP_ratio_median[:, ll])
             Y_std_temp.append(output_byTP_ratio_iqr[:, ll])
         iSlicesPlot(effectSizes[0], Y_temp, Y_std_temp, \
-                    'papy_output/plot-slice-power-rate-byCorrection-diffgroups-eff.html', \
+                    output_folder + '/plot-slice-power-rate-byCorrection-diffgroups-eff.html', \
                     'Proportion of Variables with Power (True Positive)> 0.8', \
                     'Effect Size', 'tpby', 'Sample Size=', sampleSizes[:, slice_cols])
         
     if (outcome_type == 1 or outcome_type == 2):
         print('2 - Making html files with some plotting')
         ##plot the surfaces of power rate acrossing the combination of effectSize and SampleSize (linear regression)
-        iSurfacePlotTPR(output_uncTP_ratio_median_ln, 'papy_output/plot-power-rate-noCorrection-linearregression.html',
+        iSurfacePlotTPR(output_uncTP_ratio_median_ln, output_folder + '/plot-power-rate-noCorrection-linearregression.html',
                         'no correction', sampleSizes, effectSizes, numberreps)
         iSurfacePlotTPR(output_bonfTP_ratio_median_ln,
-                        'papy_output/plot-power-rate-bonfCorrection-linearregression.html', 'Bonferroni correction',
+                        output_folder + '/plot-power-rate-bonfCorrection-linearregression.html', 'Bonferroni correction',
                         sampleSizes, effectSizes, numberreps)
-        iSurfacePlotTPR(output_bhTP_ratio_median_ln, 'papy_output/plot-power-rate-bhCorrection-linearregression.html',
+        iSurfacePlotTPR(output_bhTP_ratio_median_ln, output_folder + '/plot-power-rate-bhCorrection-linearregression.html',
                         'Benjamini-Hochberg correction', sampleSizes, effectSizes, numberreps)
-        iSurfacePlotTPR(output_byTP_ratio_median_ln, 'papy_output/plot-power-rate-byCorrection-linearregression.html',
+        iSurfacePlotTPR(output_byTP_ratio_median_ln, output_folder + '/plot-power-rate-byCorrection-linearregression.html',
                         'Benjamini-Yekutieli correction', sampleSizes, effectSizes, numberreps)
 
         ## (linear regression)
@@ -2595,7 +2598,7 @@ def main_ui(argv1, argv2, argv3, argv4, argv5, argv6, argv7):
             Y_temp.append(output_uncTP_ratio_median_ln[ll, :])
             Y_std_temp.append(output_uncTP_ratio_iqr_ln[ll, :])
         iSlicesPlot(sampleSizes[0], Y_temp, Y_std_temp, \
-                    'papy_output/plot-slice-power-rate-noCorrection-ln.html', \
+                    output_folder + '/plot-slice-power-rate-noCorrection-ln.html', \
                     'Proportion of Variables with Power (True Positive)> 0.8 (linear-regression)', \
                     'Sample Size', 'tpn', 'Effect Size=', effectSizes[:, slice_rows])
 
@@ -2605,7 +2608,7 @@ def main_ui(argv1, argv2, argv3, argv4, argv5, argv6, argv7):
             Y_temp.append(output_bonfTP_ratio_median_ln[ll, :])
             Y_std_temp.append(output_bonfTP_ratio_iqr_ln[ll, :])
         iSlicesPlot(sampleSizes[0], Y_temp, Y_std_temp, \
-                    'papy_output/plot-slice-power-rate-bonfCorrection-ln.html', \
+                    output_folder + '/plot-slice-power-rate-bonfCorrection-ln.html', \
                     'Proportion of Variables with Power (True Positive)> 0.8 (linear-regression)', \
                     'Sample Size', 'tpb', 'Effect Size=', effectSizes[:, slice_rows])
 
@@ -2615,7 +2618,7 @@ def main_ui(argv1, argv2, argv3, argv4, argv5, argv6, argv7):
             Y_temp.append(output_bhTP_ratio_median_ln[ll, :])
             Y_std_temp.append(output_bhTP_ratio_iqr_ln[ll, :])
         iSlicesPlot(sampleSizes[0], Y_temp, Y_std_temp, \
-                    'papy_output/plot-slice-power-rate-bhCorrection-ln.html', \
+                    output_folder + '/plot-slice-power-rate-bhCorrection-ln.html', \
                     'Proportion of Variables with Power (True Positive)> 0.8 (linear-regression)', \
                     'Sample Size', 'tpbh', 'Effect Size=', effectSizes[:, slice_rows])
 
@@ -2625,7 +2628,7 @@ def main_ui(argv1, argv2, argv3, argv4, argv5, argv6, argv7):
             Y_temp.append(output_byTP_ratio_median_ln[ll, :])
             Y_std_temp.append(output_byTP_ratio_iqr_ln[ll, :])
         iSlicesPlot(sampleSizes[0], Y_temp, Y_std_temp, \
-                    'papy_output/plot-slice-power-rate-byCorrection-ln.html', \
+                    output_folder + '/plot-slice-power-rate-byCorrection-ln.html', \
                     'Proportion of Variables with Power (True Positive)> 0.8 (linear-regression)', \
                     'Sample Size', 'tpby', 'Effect Size=', effectSizes[:, slice_rows])
 
@@ -2638,7 +2641,7 @@ def main_ui(argv1, argv2, argv3, argv4, argv5, argv6, argv7):
             Y_temp.append(output_uncTP_ratio_median_ln[:, ll])
             Y_std_temp.append(output_uncTP_ratio_iqr_ln[:, ll])
         iSlicesPlot(effectSizes[0], Y_temp, Y_std_temp, \
-                    'papy_output/plot-slice-power-rate-noCorrection-ln-eff.html', \
+                    output_folder + '/plot-slice-power-rate-noCorrection-ln-eff.html', \
                     'Proportion of Variables with Power (True Positive)> 0.8 (linear-regression)', \
                     'Effect Size', 'tpn', 'Sample Size=', sampleSizes[:, slice_cols])
 
@@ -2648,7 +2651,7 @@ def main_ui(argv1, argv2, argv3, argv4, argv5, argv6, argv7):
             Y_temp.append(output_bonfTP_ratio_median_ln[:, ll])
             Y_std_temp.append(output_bonfTP_ratio_iqr_ln[:, ll])
         iSlicesPlot(effectSizes[0], Y_temp, Y_std_temp, \
-                    'papy_output/plot-slice-power-rate-bonfCorrection-ln-eff.html', \
+                    output_folder + '/plot-slice-power-rate-bonfCorrection-ln-eff.html', \
                     'Proportion of Variables with Power (True Positive)> 0.8 (linear-regression)', \
                     'Effect Size', 'tpb', 'Sample Size=', sampleSizes[:, slice_cols])
 
@@ -2658,7 +2661,7 @@ def main_ui(argv1, argv2, argv3, argv4, argv5, argv6, argv7):
             Y_temp.append(output_bhTP_ratio_median_ln[:, ll])
             Y_std_temp.append(output_bhTP_ratio_iqr_ln[:, ll])
         iSlicesPlot(effectSizes[0], Y_temp, Y_std_temp, \
-                    'papy_output/plot-slice-power-rate-bhCorrection-ln-eff.html', \
+                    output_folder + '/plot-slice-power-rate-bhCorrection-ln-eff.html', \
                     'Proportion of Variables with Power (True Positive)> 0.8 (linear-regression)', \
                     'Effect Size', 'tpbh', 'Sample Size=', sampleSizes[:, slice_cols])
 
@@ -2668,7 +2671,7 @@ def main_ui(argv1, argv2, argv3, argv4, argv5, argv6, argv7):
             Y_temp.append(output_byTP_ratio_median_ln[:, ll])
             Y_std_temp.append(output_byTP_ratio_iqr_ln[:, ll])
         iSlicesPlot(effectSizes[0], Y_temp, Y_std_temp, \
-                    'papy_output/plot-slice-power-rate-byCorrection-ln-eff.html', \
+                    output_folder + '/plot-slice-power-rate-byCorrection-ln-eff.html', \
                     'Proportion of Variables with Power (True Positive)> 0.8 (linear-regression)', \
                     'Effect Size', 'tpby', 'Sample Size=', sampleSizes[:, slice_cols])
   
@@ -2696,7 +2699,7 @@ def main_ui(argv1, argv2, argv3, argv4, argv5, argv6, argv7):
                 # for calculating standard deviation
                 std_diffgroups_array = np.std(temp_diffgroups_array, axis=0)
                 print('1 - Making html files with some plotting')
-                t = 'papy_output/mean-diffgroups-%s.csv' % (sv_filenames[jj][kk])
+                t = output_folder + '/mean-diffgroups-%s.csv' % (sv_filenames[jj][kk])
                 print('making file', t)
                 file_handle = open(t, 'a')
                 np.savetxt(file_handle, mean_diffgroups_array, delimiter=",", fmt='%.10f')
@@ -2707,7 +2710,7 @@ def main_ui(argv1, argv2, argv3, argv4, argv5, argv6, argv7):
                 mean_linearregression_array = np.mean(temp_linearregression_array, axis=0)
                 # for calculating standard deviation
                 std_linearregression_array = np.std(temp_linearregression_array, axis=0)
-                t = 'papy_output/mean-linearregression-%s.csv' % (sv_filenames[jj][kk])
+                t = output_folder + '/mean-linearregression-%s.csv' % (sv_filenames[jj][kk])
                 print('making file', t)
                 file_handle = open(t, 'a')
                 np.savetxt(file_handle, mean_linearregression_array, delimiter=",", fmt='%.10f')
@@ -2723,34 +2726,34 @@ def main_ui(argv1, argv2, argv3, argv4, argv5, argv6, argv7):
                     mean_linearregression_array = np.expand_dims(mean_linearregression_array, axis=0)
 
             if (outcome_type == 0 or outcome_type == 2):
-                iSurfacePlot(mean_diffgroups_array, 'papy_output/plot-mean-diffgroups-%s.html' % (sv_filenames[jj][kk]),
+                iSurfacePlot(mean_diffgroups_array, output_folder + '/plot-mean-diffgroups-%s.html' % (sv_filenames[jj][kk]),
                              1, 1, 1, sampleSizes, effectSizes, numberreps)
             if (outcome_type == 1 or outcome_type == 2):
                 iSurfacePlot(mean_linearregression_array,
-                             'papy_output/plot-mean-linearregression-%s.html' % (sv_filenames[jj][kk]), 1, 1, 1,
+                             output_folder + '/plot-mean-linearregression-%s.html' % (sv_filenames[jj][kk]), 1, 1, 1,
                              sampleSizes, effectSizes, numberreps)
 
-    shutil.make_archive('papy_output_zip', 'zip', 'papy_output')
+    shutil.make_archive('papy_output_zip', 'zip', output_folder)
 
     ##copy some files for user viewing in results folder
     if not os.path.exists('results'):
         os.makedirs('results')
     if (outcome_type == 0 or outcome_type == 2):
-        shutil.copy2('papy_output/plot-power-rate-byCorrection-diffgroups.html', 'results')
-        shutil.copy2('papy_output/plot-slice-power-rate-byCorrection-diffgroups.html', 'results')
-        shutil.copy2('papy_output/plot-slice-power-rate-byCorrection-diffgroups-eff.html', 'results')
-        shutil.copy2('papy_output/plot-power-rate-noCorrection-diffgroups.html', 'results')
-        shutil.copy2('papy_output/plot-slice-power-rate-noCorrection-diffgroups.html', 'results')
-        shutil.copy2('papy_output/plot-slice-power-rate-noCorrection-diffgroups-eff.html', 'results')
+        shutil.copy2(output_folder + '/plot-power-rate-byCorrection-diffgroups.html', 'results')
+        shutil.copy2(output_folder + '/plot-slice-power-rate-byCorrection-diffgroups.html', 'results')
+        shutil.copy2(output_folder + '/plot-slice-power-rate-byCorrection-diffgroups-eff.html', 'results')
+        shutil.copy2(output_folder + '/plot-power-rate-noCorrection-diffgroups.html', 'results')
+        shutil.copy2(output_folder + '/plot-slice-power-rate-noCorrection-diffgroups.html', 'results')
+        shutil.copy2(output_folder + '/plot-slice-power-rate-noCorrection-diffgroups-eff.html', 'results')
     if (outcome_type == 1 or outcome_type == 2):
-        shutil.copy2('papy_output/plot-power-rate-byCorrection-linearregression.html', 'results')
-        shutil.copy2('papy_output/plot-slice-power-rate-byCorrection-ln.html', 'results')
-        shutil.copy2('papy_output/plot-slice-power-rate-byCorrection-ln-eff.html', 'results')
-        shutil.copy2('papy_output/plot-power-rate-noCorrection-linearregression.html', 'results')
-        shutil.copy2('papy_output/plot-slice-power-rate-noCorrection-ln.html', 'results')
-        shutil.copy2('papy_output/plot-slice-power-rate-noCorrection-ln-eff.html', 'results')
+        shutil.copy2(output_folder + '/plot-power-rate-byCorrection-linearregression.html', 'results')
+        shutil.copy2(output_folder + '/plot-slice-power-rate-byCorrection-ln.html', 'results')
+        shutil.copy2(output_folder + '/plot-slice-power-rate-byCorrection-ln-eff.html', 'results')
+        shutil.copy2(output_folder + '/plot-power-rate-noCorrection-linearregression.html', 'results')
+        shutil.copy2(output_folder + '/plot-slice-power-rate-noCorrection-ln.html', 'results')
+        shutil.copy2(output_folder + '/plot-slice-power-rate-noCorrection-ln-eff.html', 'results')
         ##delete the papy_output folder
-    shutil.rmtree('papy_output')
+    shutil.rmtree(output_folder)
 
     ##display user information
     print('The output files are in the papy_output_zip.zip in the running directory')

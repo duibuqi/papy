@@ -2,7 +2,7 @@ import dash
 import dash_core_components as dcc
 import dash_html_components as html
 from dash.dependencies import Input, Output, State
-import dash_table
+from flask import send_file
 import pandas as pd
 import numpy as np  
 import base64
@@ -15,6 +15,12 @@ import shutil
 
 UPLOAD_DIRECTORY = 'user/'
 
+def make_download_link():
+    return html.Div(className='row', children=[
+                        html.Div(className='tablelabel col-xs-12', 
+                                 children=html.A('Download results', id='download-zip', download="papy_output_zip.zip",href="/dash/download",target="_blank",n_clicks = 0 ))
+                    ])
+    
 def generate_table(dataframe, max_rows=5):
     if dataframe is not None:
         return html.Table(
@@ -59,11 +65,9 @@ def post_it(error_msg):
 app = dash.Dash(__name__)
 #plotly_df = px.data.gapminder().query("country=='Canada'")
 
-app.layout = html.Div(className='col-sm-12', children=[
+app.layout = html.Div(className='col-sm-12 palegrey', children=[
     
-        html.H3('Power Analysis', className='page-header'),
-                   
-                
+        html.H3('Power Analysis', className='page-header'),               
         dcc.Store(id='store', storage_type='session'),
         html.Div(className="col-sm-6", children=[
             
@@ -92,11 +96,8 @@ app.layout = html.Div(className='col-sm-12', children=[
                     html.Div(className='row', children=[      
                         html.Div(className='tablelabel col-xs-12', 
                                  children=html.Button('Run analysis', className='btn-primary', id='submit-button', n_clicks=0))
-                    ]),
-                    html.Div(className='row', children=[
-                        html.Div(className='tablelabel col-xs-12', 
-                                 children=html.A('Download results', id='download-zip', download="papy_output_zip.zip",href="",target="_blank",n_clicks = 0 ))
                     ])
+                    
                 ])
             ]),          
             html.Div(id='output-variables')
@@ -132,17 +133,13 @@ app.layout = html.Div(className='col-sm-12', children=[
         html.Div(id='show-data-table'),
         html.Hr(),
         dcc.Loading(id="loading-1", children=[html.Div(id="pretty-spinner")], type="default")
+        
 ])
-
-@app.callback(
-    Output('download-zip', 'href'),
-    [Input('download-zip', 'n_clicks')])
-def generate_report_url(n_clicks):
-    return '/dash/download'
 
 @app.server.route('/dash/download')
 def generate_report_url():
-    return send_file('papy_output_zip.zip', attachment_filename = ' papy_output_zip.zip', as_attachment = True)
+    print('sending file')
+    return send_file('papy_output_zip.zip', attachment_filename = 'papy_output_zip.zip', as_attachment = True)
 
 @app.callback([Output('output-data-upload', 'children'), Output('store', 'data')],
               [Input('upload-data', 'contents')],
@@ -177,15 +174,17 @@ def run_analysis(n_clicks,range,samples,effects,repeats,cpus,analysis,data):
         return html.Div('Please choose analysis type(s)'), ''
     try:
         df = pd.read_csv(data)
-        #x = threading.Thread(target= pa.main_ui, args=(df, range, samples, effects, repeats, analysis, cpus))
-        pa.main_ui(df, range, samples, effects, repeats, analysis, cpus)
         data_dir = os.path.dirname(data)
-        print('about to remove input', data_dir)
-        shutil.rmtree(data_dir)
+        #x = threading.Thread(target= pa.main_ui, args=(df, range, samples, effects, repeats, analysis, cpus))
+        pa.main_ui(df, range, samples, effects, repeats, analysis, cpus, data_dir)
+        
+        #print('about to remove input', data_dir)
+        #shutil.rmtree(data_dir)
         
     except Exception as e:
         return post_it(str(e)), ''
-    return generate_table(df),''
+    #return generate_table(df),''
+    return make_download_link(), ''
    
 
 if __name__ == '__main__':

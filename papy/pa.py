@@ -2476,7 +2476,7 @@ def main_ui(argv1, argv2, argv3, argv4, argv5, argv6, argv7, results_dir):
                                                                                                    ii + 1), axis=1),
                                                       axis=1), delimiter=",", fmt='%.5f')
                 file_handle.close()
-
+    '''
     if (outcome_type == 0 or outcome_type == 2):
         print('1 - Making html files with some plotting')
         ##plot the surfaces of power rate acrossing the combination of effectSize and SampleSize (classfied)
@@ -2732,32 +2732,11 @@ def main_ui(argv1, argv2, argv3, argv4, argv5, argv6, argv7, results_dir):
                 iSurfacePlot(mean_linearregression_array,
                              output_folder + '/plot-mean-linearregression-%s.html' % (sv_filenames[jj][kk]), 1, 1, 1,
                              sampleSizes, effectSizes, numberreps)
-
-    shutil.make_archive('papy_output_zip', 'zip', output_folder)
-
-    ##copy some files for user viewing in results folder
-    if not os.path.exists('results'):
-        os.makedirs('results')
-    if (outcome_type == 0 or outcome_type == 2):
-        shutil.copy2(output_folder + '/plot-power-rate-byCorrection-diffgroups.html', 'results')
-        shutil.copy2(output_folder + '/plot-slice-power-rate-byCorrection-diffgroups.html', 'results')
-        shutil.copy2(output_folder + '/plot-slice-power-rate-byCorrection-diffgroups-eff.html', 'results')
-        shutil.copy2(output_folder + '/plot-power-rate-noCorrection-diffgroups.html', 'results')
-        shutil.copy2(output_folder + '/plot-slice-power-rate-noCorrection-diffgroups.html', 'results')
-        shutil.copy2(output_folder + '/plot-slice-power-rate-noCorrection-diffgroups-eff.html', 'results')
-    if (outcome_type == 1 or outcome_type == 2):
-        shutil.copy2(output_folder + '/plot-power-rate-byCorrection-linearregression.html', 'results')
-        shutil.copy2(output_folder + '/plot-slice-power-rate-byCorrection-ln.html', 'results')
-        shutil.copy2(output_folder + '/plot-slice-power-rate-byCorrection-ln-eff.html', 'results')
-        shutil.copy2(output_folder + '/plot-power-rate-noCorrection-linearregression.html', 'results')
-        shutil.copy2(output_folder + '/plot-slice-power-rate-noCorrection-ln.html', 'results')
-        shutil.copy2(output_folder + '/plot-slice-power-rate-noCorrection-ln-eff.html', 'results')
-        ##delete the papy_output folder
+    '''
+    user_zip = os.path.basename(results_dir)
+    print('making zip file called', user_zip)
+    shutil.make_archive(user_zip, 'zip', output_folder)
+    shutil.move(user_zip + '.zip', results_dir)
     shutil.rmtree(output_folder)
-
-    ##display user information
-    print('The output files are in the papy_output_zip.zip in the running directory')
-    print('Please move the papy_output_zip.zip file to your work directory and unzipped it to view the output files.')
-    print('a Python script, plotSurface.py, is included for plotting interactive surface plots for variables')
-    print('for more details, please have a look the .zip file.')
+    return user_zip + '.zip'
 

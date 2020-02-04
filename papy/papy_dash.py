@@ -15,11 +15,6 @@ import shutil
 
 UPLOAD_DIRECTORY = 'user/'
 
-def make_download_link():
-    return html.Div(className='row', children=[
-                        html.Div(className='tablelabel col-xs-12', 
-                                 children=html.A('Download results', id='download-zip', download="papy_output_zip.zip",href="/dash/download",target="_blank",n_clicks = 0 ))
-                    ])
     
 def generate_table(dataframe, max_rows=5):
     if dataframe is not None:
@@ -68,7 +63,9 @@ app = dash.Dash(__name__)
 app.layout = html.Div(className='col-sm-12 palegrey', children=[
     
         html.H3('Power Analysis', className='page-header'),               
-        dcc.Store(id='store', storage_type='session'),
+        dcc.Store(id='store', storage_type='memory'),
+        dcc.Input(id='id_hidden_results', type='hidden'),
+
         html.Div(className="col-sm-6", children=[
             
             html.Div(className="panel panel-success", children=[
@@ -132,18 +129,30 @@ app.layout = html.Div(className='col-sm-12 palegrey', children=[
         html.Br(),
         html.Div(id='show-data-table'),
         html.Hr(),
-        dcc.Loading(id="loading-1", children=[html.Div(id="pretty-spinner")], type="default")
+        dcc.Loading(id="loading-1", children=[html.Div(id="pretty-spinner")], type='dot', color='#006600')
         
 ])
+def make_download_link(folder, f_name):
+    path = os.path.join(folder, f_name)
+    return html.Div(className='row', children=[
+                        html.Div(className='tablelabel col-xs-12', 
+                                 children=html.A('Download results', id='download-zip',href="/dash/download",target="_blank",n_clicks=0 ))
+                    ])
 
 @app.server.route('/dash/download')
-def generate_report_url():
-    print('sending file')
-    return send_file('papy_output_zip.zip', attachment_filename = 'papy_output_zip.zip', as_attachment = True)
+@app.callback([],
+              [Input('id_hidden_results', 'value')])
+def generate_report_url(hidden_val, storage_val):
+    print('hidden', hidden_val)
+    print('storage', storage_val)
+    
+    return send_file('blah.zip', attachment_filename=data, as_attachment = True)
 
-@app.callback([Output('output-data-upload', 'children'), Output('store', 'data')],
+@app.callback([Output('output-data-upload', 'children'), 
+               Output('store', 'data')],
               [Input('upload-data', 'contents')],
-              [State('upload-data', 'filename'), State('upload-data', 'last_modified')])
+              [State('upload-data', 'filename'), 
+               State('upload-data', 'last_modified')])
 def load_data_file(contents, file_name, mod_date):
     children = [ html.Div(file_name)]
     saved_file = None
@@ -155,7 +164,8 @@ def load_data_file(contents, file_name, mod_date):
         saved_file = save_file(contents, file_name, mod_date)
     return children, saved_file
 
-@app.callback([Output('output-variables', 'children'),Output("pretty-spinner", "children")],
+@app.callback([Output('output-variables', 'children'),
+               Output("pretty-spinner", "children") ],
               [Input('submit-button', 'n_clicks')],
               [State('id_var_range', 'value'), 
                State('id_var_samples', 'value'),
@@ -175,17 +185,10 @@ def run_analysis(n_clicks,range,samples,effects,repeats,cpus,analysis,data):
     try:
         df = pd.read_csv(data)
         data_dir = os.path.dirname(data)
-        #x = threading.Thread(target= pa.main_ui, args=(df, range, samples, effects, repeats, analysis, cpus))
-        pa.main_ui(df, range, samples, effects, repeats, analysis, cpus, data_dir)
-        
-        #print('about to remove input', data_dir)
-        #shutil.rmtree(data_dir)
-        
+        f = pa.main_ui(df, range, samples, effects, repeats, analysis, cpus, data_dir)
+        return make_download_link(data_dir, f), ''
     except Exception as e:
         return post_it(str(e)), ''
-    #return generate_table(df),''
-    return make_download_link(), ''
    
-
 if __name__ == '__main__':
-    app.run_server(debug=True)
+    app.run_server(debug=True, port=1234)

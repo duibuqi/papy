@@ -1,5 +1,4 @@
 
-/* special-elite-regular - latin  This is the typewriter style*/
 @font-face {
   font-family: 'Special Elite';
   font-style: normal;
@@ -12,7 +11,7 @@
        url('fonts/special-elite-v6-latin-regular.ttf') format('truetype'), /* Safari, Android, iOS */
        url('fonts/special-elite-v6-latin-regular.svg#SpecialElite') format('svg'); /* Legacy iOS */
 }
-/* raleway-regular - latin */
+
 @font-face {
   font-family: 'Raleway';
   font-style: normal;
@@ -38,7 +37,7 @@
        url('fonts/architects-daughter-v6-latin-regular.ttf') format('truetype'), /* Safari, Android, iOS */
        url('fonts/architects-daughter-v6-latin-regular.svg#ArchitectsDaughter') format('svg'); /* Legacy iOS */
 }
-/* julius-sans-one-regular - latin */
+
 @font-face {
   font-family: 'Julius Sans One';
   font-style: normal;
@@ -52,19 +51,6 @@
        url('fonts/julius-sans-one-v5-latin-regular.svg#JuliusSansOne') format('svg'); /* Legacy iOS */
 }
 
-/* quicksand-regular - latin */
-@font-face {
-  font-family: 'Quicksand';
-  font-style: normal;
-  font-weight: 400;
-  src: url('fonts/quicksand-v7-latin-regular.eot'); /* IE9 Compat Modes */
-  src: local('Quicksand Regular'), local('Quicksand-Regular'),
-       url('fonts/quicksand-v7-latin-regular.eot?#iefix') format('embedded-opentype'), /* IE6-IE8 */
-       url('fonts/quicksand-v7-latin-regular.woff2') format('woff2'), /* Super Modern Browsers */
-       url('fonts/quicksand-v7-latin-regular.woff') format('woff'), /* Modern Browsers */
-       url('fonts/quicksand-v7-latin-regular.ttf') format('truetype'), /* Safari, Android, iOS */
-       url('fonts/quicksand-v7-latin-regular.svg#Quicksand') format('svg'); /* Legacy iOS */
-}
 
 html {
   box-sizing: border-box;
@@ -75,7 +61,7 @@ html {
 
 body {
 	background-color:white; 
-	font-family: "Raleway";
+	font-family: "Julius Sans One";
 }
 
 .offscreen { position: absolute; left: -1000px; top: -1000px;}
@@ -107,7 +93,6 @@ body {
 	z-index:1;
 	word-wrap: break-word;
 	width:350px;
-	/*height:150px;*/ 
 	margin: 2px;	
     padding: 15px;
     -ms-transform: rotate(-2deg); /* IE 9 */

@@ -11,9 +11,18 @@ import os
 import datetime
 import pa
 import shutil
+from collections import deque
+import plotly
+import random
+import plotly.graph_objs as go
 
 UPLOAD_DIRECTORY = 'user/'
-  
+X = deque(maxlen=20)
+X.append(1)
+Y = deque(maxlen=20)
+Y.append(1)
+
+
 app = dash.Dash(__name__)
 server = app.server
 
@@ -53,7 +62,8 @@ app.layout = html.Div(className='col-sm-12 palegrey', children=[
                         ]),
                         html.Div(className='row', children=[      
                             html.Div(className='tablelabel col-xs-12', 
-                                     children=html.Button('Run analysis', className='btn-primary', id='submit-button', n_clicks=0))
+                                     children=[html.Button('Run analysis', className='btn-primary', id='submit-button', n_clicks=0),
+                                               html.Button('Plot', className='btn-default', id='plot-button', n_clicks=0)])
                         ]),  
                         html.Div(className='row', children=[              
                             html.Div(className = 'tablelabel col-xs-12', id='output-variables')
@@ -88,8 +98,29 @@ app.layout = html.Div(className='col-sm-12 palegrey', children=[
         ]),
         html.Hr(),
         dcc.Loading(id="loading-1", children=[html.Div(id="pretty-spinner")], type='dot', color='#006600'),
-        html.Div(id='display-results')
+        html.Div(id='display-results', children=[
+            html.Div('Results', className='project-header'),
+            dcc.Graph(id='pa-graph')
+        ])
 ])
+
+
+@app.callback(Output('pa-graph', 'figure'),
+              [Input('plot-button', 'n_clicks')])
+def update_graph_scatter(clicked):
+    X.append(X[-1]+clicked)
+    Y.append(Y[-1]+Y[-1]*random.uniform(-0.1,0.1))
+
+    data = plotly.graph_objs.Scatter(
+            x=list(X),
+            y=list(Y),
+            name='Scatter',
+            mode= 'lines+markers'
+            )
+
+    return {'data': [data],'layout' : go.Layout(xaxis=dict(range=[min(X),max(X)]),
+                                                yaxis=dict(range=[min(Y),max(Y)]),)}
+
 
 def save_file(contents, file_name, date):
    
@@ -115,7 +146,7 @@ def save_file(contents, file_name, date):
     return new_file
 
 def post_it(error_msg):
-    return  html.Div(className="pull-right post-it yellow", children=[
+    return  html.Div(className="pull-right post-it green", children=['Oops',
                 html.Span(error_msg, className="error-message")
                 ])
    

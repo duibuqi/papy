@@ -2350,8 +2350,7 @@ def main_ui(argv1, argv2, argv3, argv4, argv5, argv6, argv7, results_dir):
     ##if the number of variables is less than the request CPU cores, use number of variables as cores.
     if (num_cols < cores):
         cores = num_cols
-
-    
+   
     if (num_cols > 0):
         if (outcome_type == 0 or outcome_type == 2):
             print('1 - calling PCalc_2Group')
@@ -2368,7 +2367,6 @@ def main_ui(argv1, argv2, argv3, argv4, argv5, argv6, argv7, results_dir):
                         = PCalc_Continuous(XSRV[:, np.arange(int(argv2[0]), int(argv2[1]))], effectSizes, sampleSizes, 0.05,
                                    5000, numberreps, cores)
         t_end = datetime.now()
-        print('Time elapsed: ' + str(t_end - t_start))
 
     else:
         t_start = datetime.now()
@@ -2385,36 +2383,7 @@ def main_ui(argv1, argv2, argv3, argv4, argv5, argv6, argv7, results_dir):
             output_uncTP, output_bonfTP, output_bhTP, output_byTP \
                 = PCalc_Continuous(XSRV, effectSizes, sampleSizes, 0.05, 5000, numberreps, cores)
         t_end = datetime.now()
-        print('Time elapsed: ' + str(t_end - t_start))
     
-    ##diffgroups has dimension of (number of variables, 4, 10, effectsize, samplesize);
-    ##number of variables is the input number of columns from the input dataset.
-    ##4-- 4 correction options
-    ##10--10 metric as "TP","FP","TN","FN","FD","STP","SFP","STN","SFN","SFD"
-
-    '''
-    Using the SurfacePlot function to visualize results 
-    SurfacePlot(output, variable,metric,correction, sizeeff,samplsizes,nreps)
-    Output is the structure returned from the simulator, variable is the index of variable to plot
-    metric is the to display and correction the type of multiple testing correction to 
-    visualize.
-
-    Metric options:
-    1 - True positive Rate
-    2 - False Positive Rate
-    3 - True Negative Rate
-    4 - False Negative Rate
-    Correction:
-    1 - No correction
-    2 - Bonferroni
-    3 - Benjamini-Hochberg
-    4 - Benjamini-Yekutieli
-    The example line below will open the False Negative Rate surface for
-    variable number 2 without multiple testing correction
-    '''
-    ##write diffgroups and linearregression into file for testing purpose
-    ##np.savetxt('diffgroups.csv',diffgroups[1][3][1], delimiter=",")
-    ##np.savetxt('linearregression.csv',linearregression[1][3][1], delimiter=",")
     output_folder = os.path.join(results_dir, 'papy_output')
     if not os.path.exists(output_folder):
         os.makedirs(output_folder)
@@ -2433,9 +2402,6 @@ def main_ui(argv1, argv2, argv3, argv4, argv5, argv6, argv7, results_dir):
     np.savetxt(file_handle, np.array(['sample sizes']), fmt='%s')
     np.savetxt(file_handle, sampleSizes, delimiter=",", fmt='%.3f')
     file_handle.close()
-    print('written to file effect_n_sample_sizes.txt')
-    ##save files. jj- Metric options; kk- Correction options; ii- Variable number; for example: jj=1, kk=1 mean tpn-- true positive no correction.
-    print('sv_filenames', sv_filenames)
     
     for jj in range(0, sv_filenames.shape[0]):
         for kk in range(0, sv_filenames.shape[1]):

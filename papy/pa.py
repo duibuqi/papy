@@ -2351,7 +2351,7 @@ def main_ui(argv1, argv2, argv3, argv4, argv5, argv6, argv7, results_dir):
     if (num_cols < cores):
         cores = num_cols
 
-
+    
     if (num_cols > 0):
         if (outcome_type == 0 or outcome_type == 2):
             print('1 - calling PCalc_2Group')
@@ -2386,7 +2386,7 @@ def main_ui(argv1, argv2, argv3, argv4, argv5, argv6, argv7, results_dir):
                 = PCalc_Continuous(XSRV, effectSizes, sampleSizes, 0.05, 5000, numberreps, cores)
         t_end = datetime.now()
         print('Time elapsed: ' + str(t_end - t_start))
-
+    
     ##diffgroups has dimension of (number of variables, 4, 10, effectsize, samplesize);
     ##number of variables is the input number of columns from the input dataset.
     ##4-- 4 correction options
@@ -2436,6 +2436,7 @@ def main_ui(argv1, argv2, argv3, argv4, argv5, argv6, argv7, results_dir):
     print('written to file effect_n_sample_sizes.txt')
     ##save files. jj- Metric options; kk- Correction options; ii- Variable number; for example: jj=1, kk=1 mean tpn-- true positive no correction.
     print('sv_filenames', sv_filenames)
+    
     for jj in range(0, sv_filenames.shape[0]):
         for kk in range(0, sv_filenames.shape[1]):
 
@@ -2476,7 +2477,7 @@ def main_ui(argv1, argv2, argv3, argv4, argv5, argv6, argv7, results_dir):
                                                                                                    ii + 1), axis=1),
                                                       axis=1), delimiter=",", fmt='%.5f')
                 file_handle.close()
-    '''
+    
     if (outcome_type == 0 or outcome_type == 2):
         print('1 - Making html files with some plotting')
         ##plot the surfaces of power rate acrossing the combination of effectSize and SampleSize (classfied)
@@ -2732,7 +2733,7 @@ def main_ui(argv1, argv2, argv3, argv4, argv5, argv6, argv7, results_dir):
                 iSurfacePlot(mean_linearregression_array,
                              output_folder + '/plot-mean-linearregression-%s.html' % (sv_filenames[jj][kk]), 1, 1, 1,
                              sampleSizes, effectSizes, numberreps)
-    '''
+    
     user_zip = os.path.basename(results_dir)
     print('making zip file called', user_zip)
     shutil.make_archive(user_zip, 'zip', output_folder)

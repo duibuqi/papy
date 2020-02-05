@@ -9,14 +9,13 @@ import base64
 import io
 import os
 import datetime
-import plotly.express as px
 import pa
 import shutil
 
 UPLOAD_DIRECTORY = 'user/'
   
 app = dash.Dash(__name__)
-#plotly_df = px.data.gapminder().query("country=='Canada'")
+server = app.server
 
 app.layout = html.Div(className='col-sm-12 palegrey', children=[
     
@@ -196,4 +195,4 @@ def run_analysis(n_clicks,range,samples,effects,repeats,cpus,analysis,data):
         return post_it(str(e)), ''
    
 if __name__ == '__main__':
-    app.run_server(debug=True, port=1234)
+    app.run_server(debug=True)

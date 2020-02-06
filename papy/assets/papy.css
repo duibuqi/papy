@@ -26,19 +26,6 @@
 }
 
 @font-face {
-  font-family: 'Architects Daughter';
-  font-style: normal;
-  font-weight: 400;
-  src: url('fonts/architects-daughter-v6-latin-regular.eot'); /* IE9 Compat Modes */
-  src: local('Architects Daughter'), local('ArchitectsDaughter'),
-       url('fonts/architects-daughter-v6-latin-regular.eot?#iefix') format('embedded-opentype'), /* IE6-IE8 */
-       url('fonts/architects-daughter-v6-latin-regular.woff2') format('woff2'), /* Super Modern Browsers */
-       url('fonts/architects-daughter-v6-latin-regular.woff') format('woff'), /* Modern Browsers */
-       url('fonts/architects-daughter-v6-latin-regular.ttf') format('truetype'), /* Safari, Android, iOS */
-       url('fonts/architects-daughter-v6-latin-regular.svg#ArchitectsDaughter') format('svg'); /* Legacy iOS */
-}
-
-@font-face {
   font-family: 'Julius Sans One';
   font-style: normal;
   font-weight: 400;
@@ -49,6 +36,19 @@
        url('fonts/julius-sans-one-v5-latin-regular.woff') format('woff'), /* Modern Browsers */
        url('fonts/julius-sans-one-v5-latin-regular.ttf') format('truetype'), /* Safari, Android, iOS */
        url('fonts/julius-sans-one-v5-latin-regular.svg#JuliusSansOne') format('svg'); /* Legacy iOS */
+}
+
+@font-face {
+  font-family: 'Quicksand';
+  font-style: normal;
+  font-weight: 400;
+  src: url('fonts/quicksand-v7-latin-regular.eot'); /* IE9 Compat Modes */
+  src: local('Quicksand Regular'), local('Quicksand-Regular'),
+       url('fonts/quicksand-v7-latin-regular.eot?#iefix') format('embedded-opentype'), /* IE6-IE8 */
+       url('fonts/quicksand-v7-latin-regular.woff2') format('woff2'), /* Super Modern Browsers */
+       url('fonts/quicksand-v7-latin-regular.woff') format('woff'), /* Modern Browsers */
+       url('fonts/quicksand-v7-latin-regular.ttf') format('truetype'), /* Safari, Android, iOS */
+       url('fonts/quicksand-v7-latin-regular.svg#Quicksand') format('svg'); /* Legacy iOS */
 }
 
 
@@ -108,6 +108,7 @@ body {
 	font-size:1.6em;
 }
 .section-header {
+	font-family: "Julius Sans One";
     border-bottom: 1px solid #aaa7ac;
     margin: 10px 0 10px;
     padding-bottom: 5px;

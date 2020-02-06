@@ -28,7 +28,7 @@ server = app.server
 
 app.layout = html.Div(className='col-sm-12 palegrey', children=[
     
-        html.H3('Power Analysis', className='page-header'),               
+        html.H2('Statistical Power Analysis Tool', className='page-header'),               
         dcc.Store(id='store', storage_type='memory'),
         dcc.Input(id='id_hidden_results', type='hidden'),
 
@@ -62,11 +62,11 @@ app.layout = html.Div(className='col-sm-12 palegrey', children=[
                         ]),
                         html.Div(className='row', children=[      
                             html.Div(className='tablelabel col-xs-12', 
-                                     children=[html.Button('Run analysis', className='btn-primary', id='submit-button', n_clicks=0),
+                                     children=[html.Button('Run analysis', className='btn-primary', id='submit-button'),
                                                html.Button('Plot', className='btn-default', id='plot-button', n_clicks=0)])
                         ]),  
                         html.Div(className='row', children=[              
-                            html.Div(className = 'tablelabel col-xs-12', id='output-variables')
+                            html.Div(className = 'tablevalue col-xs-12', id='output-variables')
                         ])                   
                     ]),
                     html.Div(className='col-sm-6', children=[
@@ -146,13 +146,12 @@ def save_file(contents, file_name, date):
     return new_file
 
 def post_it(error_msg):
-    return  html.Div(className="pull-right post-it green", children=['Oops',
+    return  html.Div(className="pull-right post-it green", children=[
                 html.Span(error_msg, className="error-message")
                 ])
    
 def make_download_button(folder, f_name):
     uri = os.path.join(folder, f_name)
-    print('making button', uri)
     button = html.Form(
         action='/' + uri,
         method="get",
@@ -210,20 +209,22 @@ def load_data_file(contents, file_name, mod_date):
                State('store', 'data')
                ])
 def run_analysis(n_clicks,range,samples,effects,repeats,cpus,analysis,data):
-    print('running main function with data', data)
-    df = None
-    if data is None:
-        return html.Div('Please upload a csv data file to begin'), ''
-    if len(analysis)==0:
-        return html.Div('Please choose analysis type(s)'), ''
-    try:
-        df = pd.read_csv(data)
-        data_dir = os.path.dirname(data)
-        f = pa.main_ui(df, range, samples, effects, repeats, analysis, cpus, data_dir)
-        return make_download_button(data_dir, f), ''
-        #return make_download_link(data_dir, f), None
-    except Exception as e:
-        return post_it(str(e)), ''
-   
+    print('running main function with n-clicks, data', n_clicks, data)
+    if n_clicks is not None:
+        df = None
+        if data is None:
+            return post_it('No data file supplied!'), ''
+        if len(analysis)==0:
+            return post_it('Please choose analysis type(s)'), ''
+        try:
+            df = pd.read_csv(data)
+            data_dir = os.path.dirname(data)
+            f = pa.main_ui(df, range, samples, effects, repeats, analysis, cpus, data_dir)
+            return make_download_button(data_dir, f), ''
+            #return make_download_link(data_dir, f), None
+        except Exception as e:
+            return post_it(str(e)), ''
+    return [None, None]
+
 if __name__ == '__main__':
     app.run_server(debug=True)

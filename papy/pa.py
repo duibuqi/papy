@@ -2359,6 +2359,8 @@ def main_ui(argv1, argv2, argv3, argv4, argv5, argv6, argv7, results_dir):
             output_uncTP, output_bonfTP, output_bhTP, output_byTP \
                 = PCalc_2Group(XSRV[:, np.arange(int(argv2[0]), int(argv2[1]))], effectSizes, sampleSizes, 0.05, 5000,
                                numberreps, cores)
+            
+            
         if (outcome_type == 1 or outcome_type == 2):
             print('1 - calling PCalc_Continuous')
             linearregression, output_uncTP_ratio_median_ln, output_bonfTP_ratio_median_ln, output_bhTP_ratio_median_ln, output_byTP_ratio_median_ln, \
@@ -2384,6 +2386,11 @@ def main_ui(argv1, argv2, argv3, argv4, argv5, argv6, argv7, results_dir):
                 = PCalc_Continuous(XSRV, effectSizes, sampleSizes, 0.05, 5000, numberreps, cores)
         t_end = datetime.now()
     
+    print('output_uncTP_ratio_median', output_uncTP_ratio_median)
+    print('effectSizes', effectSizes)
+    print('sampleSizes', sampleSizes)
+    print('numberreps', numberreps)
+            
     output_folder = os.path.join(results_dir, 'papy_output')
     if not os.path.exists(output_folder):
         os.makedirs(output_folder)
@@ -2444,6 +2451,13 @@ def main_ui(argv1, argv2, argv3, argv4, argv5, argv6, argv7, results_dir):
                                                       axis=1), delimiter=",", fmt='%.5f')
                 file_handle.close()
     
+    '''
+    Per analysis type:
+        4 iSurfacePlotTPR() output_uncTP_ratio_median     output_bonfTP_ratio_median     output_bhTP_ratio_median       output_byTP_ratio_median
+        OR                 output_uncTP_ratio_median_ln  output_bonfTP_ratio_median_ln  output_bhTP_ratio_median_ln    output_byTP_ratio_median_ln
+        8 iSlicesPlot() one for each of the above?
+        1 iSurfacePlot() mean_diffgroups_array or mean_linearregression_array
+    '''
     if (outcome_type == 0 or outcome_type == 2):
         print('1 - Making html files with some plotting')
         ##plot the surfaces of power rate acrossing the combination of effectSize and SampleSize (classfied)

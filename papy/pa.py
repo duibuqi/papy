@@ -2455,7 +2455,7 @@ def main_ui(argv1, argv2, argv3, argv4, argv5, argv6, argv7, results_dir):
     Per analysis type:
         4 iSurfacePlotTPR() output_uncTP_ratio_median     output_bonfTP_ratio_median     output_bhTP_ratio_median       output_byTP_ratio_median
         OR                 output_uncTP_ratio_median_ln  output_bonfTP_ratio_median_ln  output_bhTP_ratio_median_ln    output_byTP_ratio_median_ln
-        8 iSlicesPlot() one for each of the above?
+        8 iSlicesPlot() two for each of the above, different secions
         1 iSurfacePlot() mean_diffgroups_array or mean_linearregression_array
     '''
     if (outcome_type == 0 or outcome_type == 2):

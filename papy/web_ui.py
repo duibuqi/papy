@@ -18,14 +18,18 @@ import plotly.graph_objs as go
 
 UPLOAD_DIRECTORY = 'user/'
 
+external_stylesheets = [
+    'https://fonts.googleapis.com/css?family=Nunito+Sans:200,300,400,600,700,800,900'
+]
 
-app = dash.Dash(__name__)
+app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
 server = app.server
+
 
 app.layout = html.Div(children=[
     html.Div(className="hero-wrap container-fluid", children=[
         html.Div(className="row d-md-flex no-gutters slider-text", children=[     
-            html.Div(className="col-md-11", children=[
+            html.Div(className="col-md-12", children=[
                  html.Div(className="text mt-5", children=[
                     html.H1('Statistical Power Analysis', className='mb-5'),     
                     
@@ -51,7 +55,7 @@ app.layout = html.Div(children=[
                                                 ])
                                             ]),
                                             html.Div(className="col-md mr-md-2", children=[
-                                                html.Div('Range of variables',className='papy'),
+                                                html.Div('Range of variables:',className='papy'),
                                                 html.Div(className="form-group", children=[
                                                     html.Div(className="form-field", children=[
                                                         dcc.Input(id='id_var_range', value='9-12', type="text", className="form-control")
@@ -59,7 +63,7 @@ app.layout = html.Div(children=[
                                                 ])
                                             ]),
                                             html.Div(className="col-md mr-md-2", children=[
-                                                html.Div('Range of sample sizes',className='papy'),
+                                                html.Div('Range of sample sizes:',className='papy'),
                                                 html.Div(className="form-group", children=[
                                                     html.Div(className="form-field", children=[
                                                         dcc.Input(id='id_var_samples', value='0:100:500', type="text", className="form-control")
@@ -67,7 +71,7 @@ app.layout = html.Div(children=[
                                                 ])
                                             ]),
                                             html.Div(className="col-md mr-md-2", children=[
-                                                html.Div('Range of effect sizes',className='papy'),
+                                                html.Div('Range of effect sizes:',className='papy'),
                                                 html.Div(className="form-group", children=[
                                                     html.Div(className="form-field", children=[
                                                         dcc.Input(id='id_var_effects', value='0.05:0.05:0.7', type="text", className="form-control")
@@ -75,7 +79,7 @@ app.layout = html.Div(children=[
                                                 ])
                                             ]),
                                             html.Div(className="col-md mr-md-2", children=[
-                                                html.Div('Repeats',className='papy'),
+                                                html.Div('Repeats:',className='papy'),
                                                 html.Div(className="form-group", children=[
                                                     html.Div(className="form-field", children=[
                                                         dcc.Input(id='id_var_repeats', value='10', type="text", className="form-control")
@@ -83,7 +87,7 @@ app.layout = html.Div(children=[
                                                 ])
                                             ]),
                                             html.Div(className="col-md mr-md-2", children=[
-                                                html.Div('Number of CPUs',className='papy'),
+                                                html.Div('Number of CPUs:',className='papy'),
                                                 html.Div(className="form-group", children=[
                                                     html.Div(className="form-field", children=[
                                                         dcc.Input(id='id_var_cpus', value='1', type="text", className="form-control")
@@ -91,8 +95,9 @@ app.layout = html.Div(children=[
                                                 ])
                                             ])
                                         ]),
-                                        html.Div(className="row no-gutters", children=[
-                                             html.Div(className="col-md-8", children=[
+                                        html.Div(className="row", children=[
+                                             html.H3(id='user-msg', className='col-md-3'),
+                                             html.Div(className="text-right col-md-5", children=[
                                                 html.Div(className="form-group", children=[
                                                     html.Div(className="form-field", children=[ 
                                                         dcc.Checklist(className='col-md-8', id='id_var_analysis',
@@ -101,16 +106,18 @@ app.layout = html.Div(children=[
                                                             {'label': 'Regression', 'value': 1}
                                                         ],
                                                         value=[0,1],
-                                                        labelStyle={'padding':'10px', 'color':'white', 'font-size': '20px'}
+                                                        labelStyle={'padding':'10px', 'color':'white', 'fontSize': '20px'}
                                                     )  
                                                     ])  
                                                     
                                                 ])
                                             ]),
+                                            
+                                           
                                             html.Div(className="col-md-4", children=[
                                                 html.Div(className="form-group row", children=[
                                                    
-                                                        html.Button('Run analysis', id='submit-button', type="submit", className="col-md-6 form-control btn btn-secondary"),
+                                                        html.Button('Run analysis', id='submit-button', n_clicks=0, type="submit", className="col-md-6 form-control btn btn-secondary"),
                                                         html.Div(id="results-button", className='col-md-6')
                                                     
                                                 ])
@@ -120,11 +127,14 @@ app.layout = html.Div(children=[
                                 ])
                             ])
                         ])
-                    ]),                    
+                    ]), 
+                   
+                                            
+                    dcc.Loading(id="loading-1", children=[html.Div(id="pretty-spinner")], type='dot', color='#001166'),                   
                     dcc.Store(id='store', storage_type='memory'),
                     dcc.Input(id='id_hidden_results', type='hidden'),        
-
-  
+                    html.Div(id='trigger',children=0, style=dict(display='none')),
+                    html.Div(id='other-element'),
                     html.Div(className='row', children=[             
                         html.Div(className = 'tablevalue col-xs-12', id='output-variables')
                     ]),                     
@@ -133,11 +143,25 @@ app.layout = html.Div(children=[
         ])
     ]),
 
-    dcc.Loading(id="loading-1", children=[html.Div(id="pretty-spinner")], type='dot', color='#001166')
+   
     
 ])
-
-
+            
+@app.callback(
+    Output('submit-button','disabled'),
+    [Input('submit-button','n_clicks'),
+     Input('trigger','children')])
+def trigger_function(n_clicks,trigger):
+    print('triggered!')
+    context = dash.callback_context.triggered[0]['prop_id'].split('.')[0]
+    context_value = dash.callback_context.triggered[0]['value']
+    if context == 'submit-button':
+        if n_clicks > 0 :
+            return True
+        else:
+            return False
+    else:
+        return False
 
 def save_file(contents, file_name, date):
    
@@ -163,7 +187,7 @@ def save_file(contents, file_name, date):
     return new_file
 
 def post_it(error_msg):
-    return  html.Div(className="papy", children=[
+    return  html.Div(className="post-it yellow", children=[
                 html.Span(error_msg, className="error-message")
                 ])
    
@@ -219,7 +243,9 @@ def load_data_file(contents, file_name, mod_date):
 
 
 @app.callback([Output('results-button', 'children'),
-               Output("pretty-spinner", "children") ],
+               Output("pretty-spinner", "children"),
+               Output('trigger','children'),
+               Output('user-msg','children') ],
               [Input('submit-button', 'n_clicks')],
               [State('id_var_range', 'value'), 
                State('id_var_samples', 'value'),
@@ -234,18 +260,18 @@ def run_analysis(n_clicks,range,samples,effects,repeats,cpus,analysis,data):
     if n_clicks is not None:
         df = None
         if data is None:
-            return post_it('No data file supplied!'), ''
+            return (make_download_button(), '', 1, post_it('Please upload a data file to begin'))
         if len(analysis)==0:
-            return post_it('Please choose analysis type(s)'), ''
+            return (make_download_button(), '', 1, post_it('Please choose at least one analysis type'))
         try:
             df = pd.read_csv(data)
             data_dir = os.path.dirname(data)
             f = pa.main_ui(df, range, samples, effects, repeats, analysis, cpus, data_dir)
-            return make_download_button(data_dir, f, False), ''
+            return make_download_button(data_dir, f, False), '', 1, ''
             #return make_download_link(data_dir, f), None
         except Exception as e:
-            return post_it(str(e)), ''
-    return make_download_button(), None
+            return (make_download_button(), '', 1, post_it(str(e)))
+    return make_download_button(), None, 1, ''
 
 if __name__ == '__main__':
     app.run_server(debug=True)

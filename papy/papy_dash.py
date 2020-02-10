@@ -96,6 +96,46 @@ app.layout = html.Div(className='col-sm-12 palegrey', children=[
                 ])
             ])
         ]),
+        html.Section(className="ftco-section ftco-candidates bg-primary", children=[
+        html.Div(className="container", children=[
+            html.Div(className="row justify-content-center pb-3", children=[
+                html.Div(className="col-md-10 heading-section heading-section-white text-center ftco-animate", children=[
+                    html.Span('Candidates', className="subheading"),
+                    html.H2('Latest Candidates', className="mb-4")
+                    ])
+                ]),
+                html.Div(className="container", children=[
+                    html.Div(className="row", children=[
+                        html.Div(className="col-md-12 ftco-animate", children=[
+                            html.Div(className="carousel-candidates owl-carousel", children=[
+                                html.Div(className="item", children=[
+                                    html.A(href="#", className="team text-center", children=[
+                                        html.Div(html.Img(src=app.get_asset_url('person_4.jpg'))),
+                                        html.H2('Danica Lewis'),
+                                        html.Span('Place', className="position")
+                                    ])
+                                ]),
+                                html.Div(className="item", children=['two'
+                                   
+                                ]),
+                                html.Div(className="item", children=['three'
+                                    
+                                ]),
+                                html.Div(className="item", children=['four'
+                                    
+                                ]),
+                                html.Div(className="item", children=['five'
+                                   
+                                ]),
+                                html.Div(className="item", children=['six'
+                                    
+                                ])
+                            ])
+                        ])
+                    ])
+                ])
+            ])
+        ]),
         html.Hr(),
         dcc.Loading(id="loading-1", children=[html.Div(id="pretty-spinner")], type='dot', color='#006600'),
         html.Div(id='display-results', children=[

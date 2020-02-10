@@ -39,11 +39,49 @@
 *::after {
   -webkit-box-sizing: border-box;
   box-sizing: border-box; }
-
+.post-it {
+	font-family:"Nunito";
+	position:absolute;
+	z-index:1;
+	word-wrap: break-word;
+	width:350px;
+	/*height:150px;*/ 
+	margin: 2px;	
+    padding: 15px;
+    -ms-transform: rotate(-2deg); /* IE 9 */
+    -webkit-transform: rotate(-2deg); /* Safari */
+    transform: rotate(-2deg);
+    box-shadow: 1px 8px 4px -4px rgba(0, 0, 0, 0.16), 1px 8px 4px -4px rgba(0, 0, 0, 0.12) !important;
+}
+.whitish {
+	background-color: #fbfbfb;
+	border-top:solid 20px #fcfcfc;
+}
+.blue {
+	background-color: #b6ffff;
+	border-top:solid 20px #c5ffff;
+}
+.yellow {
+	border-top:solid 20px #fffaaa;
+	background-color: #f4fa9d;
+}
+.orange {
+	border-top:solid 20px #f8a123;
+	background-color: #f69011;
+}
+.green {
+	border-top:solid 20px #d4ff88;
+	background-color: #ccff55;
+}
+.pink {
+	border-top:solid 20px #ff93ff;
+	background-color: #ff80ff;
+}
 .papy {
   color: #ffffff;
   text-align: left;
-  #text-transform: uppercase;
+  font-style: italic;
+  
 }
   
 html {

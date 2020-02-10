@@ -17,20 +17,17 @@ import random
 import plotly.graph_objs as go
 
 UPLOAD_DIRECTORY = 'user/'
-X = deque(maxlen=20)
-X.append(1)
-Y = deque(maxlen=20)
-Y.append(1)
+
 
 app = dash.Dash(__name__)
 server = app.server
 
 app.layout = html.Div(children=[
-    html.Div(className="hero-wrap container-fluid px-0", children=[
-        html.Div(className="row d-md-flex no-gutters slider-text align-items-end js-fullheight justify-content-end", children=[         
-            html.Div(className="one-forth", children=[
+    html.Div(className="hero-wrap container-fluid", children=[
+        html.Div(className="row d-md-flex no-gutters slider-text", children=[     
+            html.Div(className="col-md-11", children=[
                  html.Div(className="text mt-5", children=[
-                    html.H1('Statistical Power Analysis Tool', className='mb-5'),     
+                    html.H1('Statistical Power Analysis', className='mb-5'),     
                     
                     html.Div(className="ftco-search", children=[
                         html.Div(className="row", children=[
@@ -43,26 +40,79 @@ app.layout = html.Div(children=[
                                 html.Div(className="tab-content p-4", id="v-pills-tabContent", children=[
                                     html.Div(className="tab-pane fade show active", id="v-pills-1", role="tabpanel", children=[
                                         html.Div(className="row no-gutters", children=[
+                                           
                                             html.Div(className="col-md mr-md-2", children=[
+                                                html.Div(className='btn btn-primary'),
+                                                html.Div(className="form-group", children=[
+                                                    html.Div(className="form-field", children=[                  
+                                                        dcc.Upload(id='upload-data', children=html.Div(html.Button('Upload CSV file', className='form-control btn btn-secondary'))),
+                                                        html.Div(className='btn btn-primary', id='output-data-upload')
+                                                    ])
+                                                ])
+                                            ]),
+                                            html.Div(className="col-md mr-md-2", children=[
+                                                html.Div('Range of variables',className='papy'),
                                                 html.Div(className="form-group", children=[
                                                     html.Div(className="form-field", children=[
+                                                        dcc.Input(id='id_var_range', value='9-12', type="text", className="form-control")
+                                                    ])
+                                                ])
+                                            ]),
+                                            html.Div(className="col-md mr-md-2", children=[
+                                                html.Div('Range of sample sizes',className='papy'),
+                                                html.Div(className="form-group", children=[
+                                                    html.Div(className="form-field", children=[
+                                                        dcc.Input(id='id_var_samples', value='0:100:500', type="text", className="form-control")
+                                                    ])
+                                                ])
+                                            ]),
+                                            html.Div(className="col-md mr-md-2", children=[
+                                                html.Div('Range of effect sizes',className='papy'),
+                                                html.Div(className="form-group", children=[
+                                                    html.Div(className="form-field", children=[
+                                                        dcc.Input(id='id_var_effects', value='0.05:0.05:0.7', type="text", className="form-control")
+                                                    ])
+                                                ])
+                                            ]),
+                                            html.Div(className="col-md mr-md-2", children=[
+                                                html.Div('Repeats',className='papy'),
+                                                html.Div(className="form-group", children=[
+                                                    html.Div(className="form-field", children=[
+                                                        dcc.Input(id='id_var_repeats', value='10', type="text", className="form-control")
+                                                    ])
+                                                ])
+                                            ]),
+                                            html.Div(className="col-md mr-md-2", children=[
+                                                html.Div('Number of CPUs',className='papy'),
+                                                html.Div(className="form-group", children=[
+                                                    html.Div(className="form-field", children=[
+                                                        dcc.Input(id='id_var_cpus', value='1', type="text", className="form-control")
+                                                    ])
+                                                ])
+                                            ])
+                                        ]),
+                                        html.Div(className="row no-gutters", children=[
+                                             html.Div(className="col-md-8", children=[
+                                                html.Div(className="form-group", children=[
+                                                    html.Div(className="form-field", children=[ 
+                                                        dcc.Checklist(className='col-md-8', id='id_var_analysis',
+                                                        options=[
+                                                            {'label': 'Classification', 'value': 0},
+                                                            {'label': 'Regression', 'value': 1}
+                                                        ],
+                                                        value=[0,1],
+                                                        labelStyle={'padding':'10px', 'color':'white', 'font-size': '20px'}
+                                                    )  
+                                                    ])  
                                                     
-                                                        dcc.Input(type="text", className="form-control",placeholder="eg. Garphic. Web Developer")
-                                                    ])
                                                 ])
                                             ]),
-                                            html.Div(className="col-md mr-md-2", children=[
-                                                html.Div(className="form-group", children=[
-                                                    html.Div(className="form-field", children=[
-                                                        dcc.Input(type="text", className="form-control",placeholder="eg. Garphic. Web Developer")
-                                                    ])
-                                                ])
-                                            ]),
-                                            html.Div(className="col-md", children=[
-                                                html.Div(className="form-group", children=[
-                                                    html.Div(className="form-field", children=[
-                                                        html.Button('Run analysis', type="submit", className="form-control btn btn-secondary")
-                                                    ])
+                                            html.Div(className="col-md-4", children=[
+                                                html.Div(className="form-group row", children=[
+                                                   
+                                                        html.Button('Run analysis', id='submit-button', type="submit", className="col-md-6 form-control btn btn-secondary"),
+                                                        html.Div(id="results-button", className='col-md-6')
+                                                    
                                                 ])
                                             ])
                                         ])
@@ -70,93 +120,23 @@ app.layout = html.Div(children=[
                                 ])
                             ])
                         ])
-                    ]),
-                    
-                              
+                    ]),                    
                     dcc.Store(id='store', storage_type='memory'),
-                    dcc.Input(id='id_hidden_results', type='hidden'),
-                        html.Div(className="row", children=[
-                            html.Div('Upload data', className='tablelabel col-xs-3'),
-                            html.Div(className='tablevalue col-xs-5', children=dcc.Upload(id='upload-data', children=html.Div(html.Button('Choose CSV file')))),
-                            html.Div(className='tablelabel col-xs-4', id='output-data-upload')
-                        ]),
-                        html.Div(className='row', children=[   
-                            html.Div('Analysis type', className='tablelabel col-xs-3'),
-                            html.Div(className='tablevalue col-xs-9', children=[
-                                dcc.Checklist(id='id_var_analysis',
-                                options=[
-                                    {'label': 'Classification', 'value': 0},
-                                    {'label': 'Regression', 'value': 1}
-                                ],
-                                value=[0,1],
-                                labelStyle={'padding':'10px'}
-                            )  
-                            ])
-                        ]),
-                        html.Div(className='row', children=[      
-                            html.Div(className='tablelabel col-xs-12', 
-                                     children=[html.Button('Run analysis', className='btn-primary', id='submit-button'),
-                                               html.Button('Plot', className='btn-default', id='plot-button', n_clicks=0)])
-                        ]),  
-                        html.Div(className='row', children=[              
-                            html.Div(className = 'tablevalue col-xs-12', id='output-variables')
-                        ]),            
-                        html.Div(className='row', children=[                    
-                            html.Div(className='tablelabel col-xs-5', children='Variable range'),
-                            html.Div(className='tablevalue col-xs-5', children=dcc.Input(id='id_var_range', value='9-12'))
-                        ]),
-                        html.Div(className='row', children=[    
-                            html.Div(className='tablelabel col-xs-5', children='Range of sample sizes'),
-                            html.Div(className='tablevalue col-xs-5', children=dcc.Input( id='id_var_samples', value='0:100:500'))
-                        ]),
-                        html.Div(className='row', children=[ 
-                            html.Div(className='tablelabel col-xs-5', children='Range of effect sizes'),
-                            html.Div(className='tablevalue col-xs-5', children=dcc.Input( id='id_var_effects', value= '0.05:0.05:0.7'))
-                        ]),
-                        html.Div(className='row', children=[ 
-                            html.Div(className='tablelabel col-xs-5', children='Number of repeats'),
-                            html.Div(className='tablevalue col-xs-5', children=dcc.Input( id='id_var_repeats', value= '10'))
-                        ]),
-                        html.Div(className='row', children=[ 
-                            html.Div(className='tablelabel col-xs-5', children='Number of cpus'),
-                            html.Div(className='tablevalue col-xs-5', children=dcc.Input( id='id_var_cpus', value= '1'))
-                        ])  
-                            
-                    ])
-                ])                    
-            ])
-        ]),
-        html.Section(className="ftco-section ftco-candidates bg-primary", children=[
-            html.Div(className="container", children=[
-                html.Div(className="row justify-content-center pb-3", children=[
-                    html.Div(className="col-md-10 heading-section heading-section-white text-center",children=[                     
-                        html.H2('Results', className="mb-4")
+                    dcc.Input(id='id_hidden_results', type='hidden'),        
+
+  
+                    html.Div(className='row', children=[             
+                        html.Div(className = 'tablevalue col-xs-12', id='output-variables')
+                    ]),                     
                 ])
-            ])
-        ]),
-        dcc.Loading(id="loading-1", children=[html.Div(id="pretty-spinner")], type='dot', color='#006600'),
-        html.Div(id='display-results', children=[
-            dcc.Graph(id='pa-graph')
+            ])                    
         ])
-    ])
+    ]),
+
+    dcc.Loading(id="loading-1", children=[html.Div(id="pretty-spinner")], type='dot', color='#001166')
+    
 ])
 
-
-@app.callback(Output('pa-graph', 'figure'),
-              [Input('plot-button', 'n_clicks')])
-def update_graph_scatter(clicked):
-    X.append(X[-1]+clicked)
-    Y.append(Y[-1]+Y[-1]*random.uniform(-0.1,0.1))
-
-    data = plotly.graph_objs.Scatter(
-            x=list(X),
-            y=list(Y),
-            name='Scatter',
-            mode= 'lines+markers'
-            )
-
-    return {'data': [data],'layout' : go.Layout(xaxis=dict(range=[min(X),max(X)]),
-                                                yaxis=dict(range=[min(Y),max(Y)]),)}
 
 
 def save_file(contents, file_name, date):
@@ -183,17 +163,21 @@ def save_file(contents, file_name, date):
     return new_file
 
 def post_it(error_msg):
-    return  html.Div(className="pull-right post-it green", children=[
+    return  html.Div(className="papy", children=[
                 html.Span(error_msg, className="error-message")
                 ])
    
-def make_download_button(folder, f_name):
-    uri = os.path.join(folder, f_name)
+def make_download_button(folder=None, f_name=None, disabled=True):
+    if folder is not None and f_name is not None:
+        uri = os.path.join(folder, f_name)
+    else:
+        uri = ''
+        
     button = html.Form(
         action='/' + uri,
         method="get",
         children=[
-            html.Button('Download results', className="btn-primary", type="submit")
+            html.Button('Download results', className="form-control btn btn-secondary", type="submit", disabled=disabled)
         ]
     )
     return button
@@ -234,7 +218,7 @@ def load_data_file(contents, file_name, mod_date):
     return children, saved_file
 
 
-@app.callback([Output('output-variables', 'children'),
+@app.callback([Output('results-button', 'children'),
                Output("pretty-spinner", "children") ],
               [Input('submit-button', 'n_clicks')],
               [State('id_var_range', 'value'), 
@@ -257,11 +241,11 @@ def run_analysis(n_clicks,range,samples,effects,repeats,cpus,analysis,data):
             df = pd.read_csv(data)
             data_dir = os.path.dirname(data)
             f = pa.main_ui(df, range, samples, effects, repeats, analysis, cpus, data_dir)
-            return make_download_button(data_dir, f), ''
+            return make_download_button(data_dir, f, False), ''
             #return make_download_link(data_dir, f), None
         except Exception as e:
             return post_it(str(e)), ''
-    return [None, None]
+    return make_download_button(), None
 
 if __name__ == '__main__':
     app.run_server(debug=True)

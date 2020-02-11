@@ -30,7 +30,7 @@ app.layout = html.Div(children=[
     html.Div(className="hero-wrap container-fluid", children=[
         html.Div(className="row d-md-flex no-gutters slider-text", children=[     
             html.Div(className="col-md-12", children=[
-                 html.Div(className="text mt-5", children=[
+                 html.Div(className="", children=[
                     html.H1('Statistical Power Analysis', className='mb-5'),     
                     
                     html.Div(className="ftco-search", children=[
@@ -152,15 +152,19 @@ app.layout = html.Div(children=[
     [Input('submit-button','n_clicks'),
      Input('trigger','children')])
 def trigger_function(n_clicks,trigger):
-    print('triggered!')
+   
     context = dash.callback_context.triggered[0]['prop_id'].split('.')[0]
     context_value = dash.callback_context.triggered[0]['value']
+    print('trigger context', context)
     if context == 'submit-button':
         if n_clicks > 0 :
-            return True
+            print('button will be disabled')
+            return True          
         else:
+            print('button will be enabled')
             return False
     else:
+        print('button will be enabled')
         return False
 
 def save_file(contents, file_name, date):
@@ -206,25 +210,12 @@ def make_download_button(folder=None, f_name=None, disabled=True):
     )
     return button
 
-def make_download_link(folder, f_name):
-    path = os.path.join(folder, f_name)
-    print('making link', path)
-    return html.Div(className='row', children=[
-                        html.Div(className='tablelabel col-xs-12', 
-                                 children=html.A('Download results', href='/' + path))
-                    ])
-
 @app.server.route('/user/<path:path>')
 def serve_static(path):
     print('in serve_static', path)
     path = os.path.join('user', path)
     t = os.path.abspath(path)
     return send_file(t, attachment_filename='pa_results.zip', as_attachment = True)
-
-@app.server.route('/download/results')
-def generate_report_url(file_name):
-    print('path', file_name)  
-    return send_file(file_name, attachment_filename='results.zip', as_attachment = True)
 
 @app.callback([Output('output-data-upload', 'children'), 
                Output('store', 'data')],
@@ -266,11 +257,11 @@ def run_analysis(n_clicks,range,samples,effects,repeats,cpus,analysis,data):
         try:
             df = pd.read_csv(data)
             data_dir = os.path.dirname(data)
-            f = pa.main_ui(df, range, samples, effects, repeats, analysis, cpus, data_dir)
+            f = pa.main_ui(df, range, samples, effects, repeats, analysis, cpus, data)
             return make_download_button(data_dir, f, False), '', 1, ''
             #return make_download_link(data_dir, f), None
         except Exception as e:
-            return (make_download_button(), '', 1, post_it(str(e)))
+            return (make_download_button(), '', 1, post_it('An error occurred<p>' + str(e)))
     return make_download_button(), None, 1, ''
 
 if __name__ == '__main__':

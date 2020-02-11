@@ -39,9 +39,16 @@
 *::after {
   -webkit-box-sizing: border-box;
   box-sizing: border-box; }
+
+button:disabled {
+  cursor: not-allowed;
+  pointer-events: all !important;
+}
+
 .post-it {
 	font-family:"Nunito";
 	position:absolute;
+	
 	z-index:1;
 	word-wrap: break-word;
 	width:350px;
@@ -49,9 +56,9 @@
 	margin: 2px;	
     padding: 15px;
     -ms-transform: rotate(-2deg); /* IE 9 */
-    -webkit-transform: rotate(-2deg); /* Safari */
-    transform: rotate(-2deg);
-    box-shadow: 1px 8px 4px -4px rgba(0, 0, 0, 0.16), 1px 8px 4px -4px rgba(0, 0, 0, 0.12) !important;
+    -webkit-transform: rotate(-5deg); /* Safari */
+    transform: rotate(-5deg);
+    box-shadow: 3px 12px 4px -4px rgba(0, 0, 0, 0.26), 3px 12px 4px -4px rgba(0, 0, 0, 0.26) !important;
 }
 .whitish {
 	background-color: #fbfbfb;

@@ -2284,81 +2284,15 @@ if __name__ == "__main__":
 '''
 Modifications to main function to support web ui
 '''    
-
-def main_ui(argv1, argv2, argv3, argv4, argv5, argv6, argv7, results_dir):
-    ## read the data into an array;
-    print("Results directory is", results_dir)
-    XSRV = argv1
-    print(type(XSRV))
-    if (type(XSRV).__name__ != 'ndarray'):
-        XSRV = np.array(XSRV)
-    ##print array size
-    if (XSRV.ndim > 1):
-        rows = XSRV.shape[0]
-        cols = XSRV.shape[1]
-    elif (XSRV.ndim == 1):
-        rows = 1
-        cols = XSRV.shape[0]
-
-    print('Input data matrix size is :' + str(rows) + ',' + str(cols))
-
-    tmpStr = argv2.split('-')
-    if len(tmpStr) > 1:
-        argv2 = [int(tmpStr[0]), int(tmpStr[1]) + 1]
-    else:
-        argv2 = [0, int(argv2)]
-    print('arg 2', argv2)
+def long_running_process(XSRV, num_cols, outcome_type, numberreps, variable_range, effectSizes, sampleSizes, cores, output_folder):
     
-    tmpStr = argv3.split(':')
-    argv3 = range(int(tmpStr[0]), int(tmpStr[2]), int(tmpStr[1]))
-    
-    argv3 = np.array(argv3)
-    if argv3[0] < 1:
-         argv3[0] = 1
-    argv3 = np.reshape(argv3, (1, len(argv3)))
-    print('arg 3', argv3)
-    
-    tmpStr = argv4.split(':')
-    argv4 = np.arange(float(tmpStr[0]), float(tmpStr[2]), float(tmpStr[1]))
-    if argv4[0] == 0:
-        argv4[0] = 0.05
-    argv4 = np.array(argv4)
-    argv4 = np.reshape(argv4, (1, len(argv4)))
-    print('arg 4', argv4)
-    sampleSizes = argv3  # np.array([[1, 50, 100, 200, 250, 350, 500, 750, 1000]])
-    effectSizes = argv4  # np.array([[0.05, 0.1, 0.15,0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5, 0.55, 0.6, 0.65, 0.7, 0.75, 0.8]])
-
-    ##define output metric options
-    metric_opt = np.array([1, 2, 3, 4])  # see options description below
-    correction_opt = np.array([1, 2, 3, 4])  # see correction options description below
-
-    print('arg 5,6,7', argv5, argv6, argv7)
-    numberreps = int(argv5)
-    outcome_type = argv6
-    # outcome type is a list of options in the UI version
-    if len(outcome_type) == 2:
-        outcome_type = 2
-    else:
-        outcome_type=outcome_type[0]
-    cores = int(argv7)
-   
-    ## ## Calculate for a subset of 4 variables (less than 20 seconds on 4-core desktop for each analysis)
-    diffgroups = np.array([])
-    linearregression = np.array([])
-    t_start = datetime.now()
-    num_cols = int(argv2[1]) - int(argv2[0])
-    ##if the number of variables is less than the request CPU cores, use number of variables as cores.
-    if (num_cols < cores):
-        cores = num_cols
-   
     if (num_cols > 0):
         if (outcome_type == 0 or outcome_type == 2):
             print('1 - calling PCalc_2Group')
             diffgroups, output_uncTP_ratio_median, output_bonfTP_ratio_median, output_bhTP_ratio_median, output_byTP_ratio_median, \
             output_uncTP_ratio_iqr, output_bonfTP_ratio_iqr, output_bhTP_ratio_iqr, output_byTP_ratio_iqr, \
             output_uncTP, output_bonfTP, output_bhTP, output_byTP \
-                = PCalc_2Group(XSRV[:, np.arange(int(argv2[0]), int(argv2[1]))], effectSizes, sampleSizes, 0.05, 5000,
-                               numberreps, cores)
+                = PCalc_2Group(XSRV[:, np.arange(int(variable_range[0]), int(variable_range[1]))], effectSizes, sampleSizes, 0.05, 5000, numberreps, cores)
             
             
         if (outcome_type == 1 or outcome_type == 2):
@@ -2366,12 +2300,10 @@ def main_ui(argv1, argv2, argv3, argv4, argv5, argv6, argv7, results_dir):
             linearregression, output_uncTP_ratio_median_ln, output_bonfTP_ratio_median_ln, output_bhTP_ratio_median_ln, output_byTP_ratio_median_ln, \
             output_uncTP_ratio_iqr_ln, output_bonfTP_ratio_iqr_ln, output_bhTP_ratio_iqr_ln, output_byTP_ratio_iqr_ln, \
                     output_uncTP, output_bonfTP, output_bhTP, output_byTP \
-                        = PCalc_Continuous(XSRV[:, np.arange(int(argv2[0]), int(argv2[1]))], effectSizes, sampleSizes, 0.05,
-                                   5000, numberreps, cores)
-        t_end = datetime.now()
-
+                        = PCalc_Continuous(XSRV[:, np.arange(int(variable_range[0]), int(variable_range[1]))], effectSizes, sampleSizes, 0.05, 5000, numberreps, cores)
+       
     else:
-        t_start = datetime.now()
+        
         if (outcome_type == 0 or outcome_type == 2):
             print('2 - calling PCalc_2Group')
             diffgroups, output_uncTP_ratio_median, output_bonfTP_ratio_median, output_bhTP_ratio_median, output_byTP_ratio_median, \
@@ -2384,31 +2316,13 @@ def main_ui(argv1, argv2, argv3, argv4, argv5, argv6, argv7, results_dir):
             output_uncTP_ratio_iqr_ln, output_bonfTP_ratio_iqr_ln, output_bhTP_ratio_iqr_ln, output_byTP_ratio_iqr_ln, \
             output_uncTP, output_bonfTP, output_bhTP, output_byTP \
                 = PCalc_Continuous(XSRV, effectSizes, sampleSizes, 0.05, 5000, numberreps, cores)
-        t_end = datetime.now()
-    
-    print('output_uncTP_ratio_median', output_uncTP_ratio_median)
-    print('effectSizes', effectSizes)
-    print('sampleSizes', sampleSizes)
-    print('numberreps', numberreps)
-            
-    output_folder = os.path.join(results_dir, 'papy_output')
-    if not os.path.exists(output_folder):
-        os.makedirs(output_folder)
-        
-    print("output_folder is", output_folder)
-    ##file names matrix
+       
     sv_filenames = np.array([['fpn', 'fpb', 'fpbh', 'fpby'], ['tnn', 'tnb', 'tnbh', 'tnby'], \
                              ['fdn', 'fdb', 'fdbh', 'fdby'], ['fnn', 'fnb', 'fnbh', 'fnby'], \
                              ['sfdn', 'sfdb', 'sfdbh', 'sfdby'], ['stpn', 'stpb', 'stpbh', 'stpby'], \
                              ['stnn', 'stnb', 'stnbh', 'stnby'], ['sfnn', 'sfnb', 'sfnbh', 'sfnby'], \
                              ['sfpn', 'sfpb', 'sfpbh', 'sfpby'], ['tpn', 'tpb', 'tpbh', 'tpby']])
-    ##save the effect sizes and sample sizes
-    file_handle = open(output_folder + '/effect_n_sample_sizes.txt', 'a')
-    np.savetxt(file_handle, np.array(['effect sizes']), fmt='%s')
-    np.savetxt(file_handle, effectSizes, delimiter=",", fmt='%.3f')
-    np.savetxt(file_handle, np.array(['sample sizes']), fmt='%s')
-    np.savetxt(file_handle, sampleSizes, delimiter=",", fmt='%.3f')
-    file_handle.close()
+
     
     for jj in range(0, sv_filenames.shape[0]):
         for kk in range(0, sv_filenames.shape[1]):
@@ -2417,38 +2331,36 @@ def main_ui(argv1, argv2, argv3, argv4, argv5, argv6, argv7, results_dir):
                 t = output_folder + '/diffgroups-%s.csv' % (sv_filenames[jj][kk])
                 print('making csv file', t)
                 file_handle = open(t, 'a')
-               
-                ##write the title line with columns "variables, Sample Sizes (Effect Sizes as columns), and Effect Sizes"
-                title_str = np.append(np.array([['Variables', 'Effect Sizes (Sample Sizes in Columns)']]),
-                                      sampleSizes.astype('str'), axis=1)
+                title_str = np.append(np.array([['Variables', 'Effect Sizes (Sample Sizes in Columns)']]), sampleSizes.astype('str'), axis=1)
                 np.savetxt(file_handle, title_str, delimiter=',', fmt='%s')
                 ##write rest of output matrix
                 for ii in range(0, num_cols):  ##num_cols is from the test dataset, means number of variables
-                    np.savetxt(file_handle, np.insert(diffgroups[ii][kk][jj], [0], np.insert(effectSizes.T, [0],
-                                                                                             np.ones(
-                                                                                                 [effectSizes.shape[1],
-                                                                                                  1]) * (ii + 1),
-                                                                                             axis=1), axis=1),
+                    np.savetxt(file_handle,
+                               np.insert(diffgroups[ii][kk][jj], 
+                                         [0], 
+                                         np.insert(effectSizes.T, [0],
+                                                    np.ones([effectSizes.shape[1],1]) * (ii + 1),
+                                                    axis=1), 
+                                         axis=1),
                                delimiter=",", fmt='%.5f')
                 file_handle.close()
             if (outcome_type == 1 or outcome_type == 2):
                 t = output_folder + '/linearregression-%s.csv' % (sv_filenames[jj][kk])
-                print('making csv file', t)
-                file_handle = open(t, 'a')
-               
+                file_handle = open(t, 'a')               
                 ##write the title line with columns "variables, Sample Sizes (Effect Sizes as columns), and Effect Sizes"
-                title_str = np.append(np.array([['Variables', 'Effect Sizes (Sample Sizes in Columns)']]),
-                                      sampleSizes.astype('str'), axis=1)
+                title_str = np.append(np.array([['Variables', 'Effect Sizes (Sample Sizes in Columns)']]),sampleSizes.astype('str'), axis=1)
                 np.savetxt(file_handle, title_str, delimiter=',', fmt='%s')
                 ##write rest of matrix
                 for ii in range(0, num_cols):  ##num_cols is from the test dataset, means number of variables
-                    np.savetxt(file_handle, np.insert(linearregression[ii][kk][jj], [0], np.insert(effectSizes.T, [0],
-                                                                                                   np.ones([
-                                                                                                               effectSizes.shape[
-                                                                                                                   1],
-                                                                                                               1]) * (
-                                                                                                   ii + 1), axis=1),
-                                                      axis=1), delimiter=",", fmt='%.5f')
+                    np.savetxt(file_handle,
+                               np.insert(linearregression[ii][kk][jj],
+                                        [0], 
+                                        np.insert(effectSizes.T, [0],
+                                                  np.ones([effectSizes.shape[1],1]) * (ii + 1), 
+                                                  axis=1),
+                                        axis=1), 
+                               delimiter=",", 
+                               fmt='%.5f')
                 file_handle.close()
     
     '''
@@ -2459,7 +2371,6 @@ def main_ui(argv1, argv2, argv3, argv4, argv5, argv6, argv7, results_dir):
         1 iSurfacePlot() mean_diffgroups_array or mean_linearregression_array
     '''
     if (outcome_type == 0 or outcome_type == 2):
-        print('1 - Making html files with some plotting')
         ##plot the surfaces of power rate acrossing the combination of effectSize and SampleSize (classfied)
         iSurfacePlotTPR(output_uncTP_ratio_median, output_folder + '/plot-power-rate-noCorrection-diffgroups.html',
                         'no correction', sampleSizes, effectSizes, numberreps)
@@ -2557,7 +2468,7 @@ def main_ui(argv1, argv2, argv3, argv4, argv5, argv6, argv7, results_dir):
                     'Effect Size', 'tpby', 'Sample Size=', sampleSizes[:, slice_cols])
         
     if (outcome_type == 1 or outcome_type == 2):
-        print('2 - Making html files with some plotting')
+        #print('2 - Making html files with some plotting')
         ##plot the surfaces of power rate acrossing the combination of effectSize and SampleSize (linear regression)
         iSurfacePlotTPR(output_uncTP_ratio_median_ln, output_folder + '/plot-power-rate-noCorrection-linearregression.html',
                         'no correction', sampleSizes, effectSizes, numberreps)
@@ -2679,9 +2590,9 @@ def main_ui(argv1, argv2, argv3, argv4, argv5, argv6, argv7, results_dir):
                 mean_diffgroups_array = np.mean(temp_diffgroups_array, axis=0)
                 # for calculating standard deviation
                 std_diffgroups_array = np.std(temp_diffgroups_array, axis=0)
-                print('1 - Making html files with some plotting')
+                #print('1 - Making html files with some plotting')
                 t = output_folder + '/mean-diffgroups-%s.csv' % (sv_filenames[jj][kk])
-                print('making file', t)
+                #print('making file', t)
                 file_handle = open(t, 'a')
                 np.savetxt(file_handle, mean_diffgroups_array, delimiter=",", fmt='%.10f')
                 file_handle.close()
@@ -2692,7 +2603,7 @@ def main_ui(argv1, argv2, argv3, argv4, argv5, argv6, argv7, results_dir):
                 # for calculating standard deviation
                 std_linearregression_array = np.std(temp_linearregression_array, axis=0)
                 t = output_folder + '/mean-linearregression-%s.csv' % (sv_filenames[jj][kk])
-                print('making file', t)
+                #print('making file', t)
                 file_handle = open(t, 'a')
                 np.savetxt(file_handle, mean_linearregression_array, delimiter=",", fmt='%.10f')
                 file_handle.close()
@@ -2713,6 +2624,93 @@ def main_ui(argv1, argv2, argv3, argv4, argv5, argv6, argv7, results_dir):
                 iSurfacePlot(mean_linearregression_array,
                              output_folder + '/plot-mean-linearregression-%s.html' % (sv_filenames[jj][kk]), 1, 1, 1,
                              sampleSizes, effectSizes, numberreps)
+                
+def main_ui(argv1, argv2, argv3, argv4, argv5, argv6, argv7, results_file):
+    ## read the data into an array;
+    
+    results_dir = os.path.dirname(results_file)
+    print("Results directory is", results_dir)
+    print("Results file is", results_file)
+    XSRV = argv1
+    print(type(XSRV))
+    if (type(XSRV).__name__ != 'ndarray'):
+        XSRV = np.array(XSRV)
+    ##print array size
+    if (XSRV.ndim > 1):
+        rows = XSRV.shape[0]
+        cols = XSRV.shape[1]
+    elif (XSRV.ndim == 1):
+        rows = 1
+        cols = XSRV.shape[0]
+
+    print('Input data matrix size is :' + str(rows) + ',' + str(cols))
+
+    tmpStr = argv2.split('-')
+    if len(tmpStr) > 1:
+        argv2 = [int(tmpStr[0]), int(tmpStr[1]) + 1]
+    else:
+        argv2 = [0, int(argv2)]
+    print('arg 2', argv2)
+    
+    tmpStr = argv3.split(':')
+    argv3 = range(int(tmpStr[0]), int(tmpStr[2]), int(tmpStr[1]))
+    
+    argv3 = np.array(argv3)
+    if argv3[0] < 1:
+         argv3[0] = 1
+    argv3 = np.reshape(argv3, (1, len(argv3)))
+    print('arg 3', argv3)
+    
+    tmpStr = argv4.split(':')
+    argv4 = np.arange(float(tmpStr[0]), float(tmpStr[2]), float(tmpStr[1]))
+    if argv4[0] == 0:
+        argv4[0] = 0.05
+    argv4 = np.array(argv4)
+    argv4 = np.reshape(argv4, (1, len(argv4)))
+    print('arg 4', argv4)
+    
+    variable_range = argv2
+    sampleSizes = argv3  # np.array([[1, 50, 100, 200, 250, 350, 500, 750, 1000]])
+    effectSizes = argv4  # np.array([[0.05, 0.1, 0.15,0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5, 0.55, 0.6, 0.65, 0.7, 0.75, 0.8]])
+
+    ##define output metric options
+    metric_opt = np.array([1, 2, 3, 4])  # see options description below
+    correction_opt = np.array([1, 2, 3, 4])  # see correction options description below
+
+    print('arg 5,6,7', argv5, argv6, argv7)
+    numberreps = int(argv5)
+    outcome_type = argv6
+    # outcome type is a list of options in the UI version
+    if len(outcome_type) == 2:
+        outcome_type = 2
+    else:
+        outcome_type=outcome_type[0]
+    cores = int(argv7)
+   
+    ## ## Calculate for a subset of 4 variables (less than 20 seconds on 4-core desktop for each analysis)
+    diffgroups = np.array([])
+    linearregression = np.array([])
+    t_start = datetime.now()
+    num_cols = int(argv2[1]) - int(argv2[0])
+    ##if the number of variables is less than the request CPU cores, use number of variables as cores.
+    if (num_cols < cores):
+        cores = num_cols
+             
+    output_folder = os.path.join(results_dir, 'papy_output')
+    if not os.path.exists(output_folder):
+        os.makedirs(output_folder)
+        
+    print("output_folder is", output_folder)
+    
+    ##save the effect sizes and sample sizes
+    file_handle = open(output_folder + '/effect_n_sample_sizes.txt', 'a')
+    np.savetxt(file_handle, np.array(['effect sizes']), fmt='%s')
+    np.savetxt(file_handle, effectSizes, delimiter=",", fmt='%.3f')
+    np.savetxt(file_handle, np.array(['sample sizes']), fmt='%s')
+    np.savetxt(file_handle, sampleSizes, delimiter=",", fmt='%.3f')
+    file_handle.close()
+    
+    long_running_process(XSRV, num_cols, outcome_type, numberreps, variable_range, effectSizes, sampleSizes, cores, output_folder)
     
     user_zip = os.path.basename(results_dir)
     print('making zip file called', user_zip)

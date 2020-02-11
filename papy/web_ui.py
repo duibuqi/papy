@@ -25,14 +25,28 @@ external_stylesheets = [
 app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
 server = app.server
 
+def post_it(error_msg, col):
+    return  html.Div(className="post-it " + col, children=[
+                html.Span(error_msg, className="error-message")
+                ])
+    
+app.layout = html.Div(className='shadow-panel', children=[
+    
+    html.Div(className="container-fluid", children=[
+        html.Div(className="row", children=[ 
 
-app.layout = html.Div(children=[
-    html.Div(className="hero-wrap container-fluid", children=[
-        html.Div(className="row d-md-flex no-gutters slider-text", children=[     
+            html.Div(className='col-md-8'),
+            html.H3(id="user-msg", className='col-md-4')
+        ]),
+        html.Div(className="row no-gutters slider-text", children=[ 
+          
             html.Div(className="col-md-12", children=[
+                 
                  html.Div(className="", children=[
-                    html.H1('Statistical Power Analysis', className='mb-5'),     
-                    
+
+                    html.H1('Statistical Power Analysis', className='papy-heading'),     
+                   
+
                     html.Div(className="ftco-search", children=[
                         html.Div(className="row", children=[
                             html.Div(className="col-md-12 nav-link-wrap", children=[
@@ -49,7 +63,7 @@ app.layout = html.Div(children=[
                                                 html.Div(className='btn btn-primary'),
                                                 html.Div(className="form-group", children=[
                                                     html.Div(className="form-field", children=[                  
-                                                        dcc.Upload(id='upload-data', children=html.Div(html.Button('Upload CSV file', className='form-control btn btn-secondary'))),
+                                                        dcc.Upload(id='upload-data', children=html.Div(html.Button('Upload CSV file', className='text-nowrap form-control btn btn-secondary'))),
                                                         html.Div(className='btn btn-primary', id='output-data-upload')
                                                     ])
                                                 ])
@@ -96,14 +110,14 @@ app.layout = html.Div(children=[
                                             ])
                                         ]),
                                         html.Div(className="row", children=[
-                                             html.H3(id='user-msg', className='col-md-3'),
-                                             html.Div(className="text-right col-md-5", children=[
+                                             #html.H3(id='user-msg', className='col-md-3'),
+                                             html.Div(className="text-right col-md-8", children=[
                                                 html.Div(className="form-group", children=[
                                                     html.Div(className="form-field", children=[ 
-                                                        dcc.Checklist(className='col-md-8', id='id_var_analysis',
+                                                        dcc.Checklist(className='col-md-8 papy', id='id_var_analysis',
                                                         options=[
                                                             {'label': 'Classification', 'value': 0},
-                                                            {'label': 'Regression', 'value': 1}
+                                                            {'label': 'Linear regression', 'value': 1}
                                                         ],
                                                         value=[0,1],
                                                         labelStyle={'padding':'10px', 'color':'white', 'fontSize': '20px'}
@@ -116,9 +130,8 @@ app.layout = html.Div(children=[
                                            
                                             html.Div(className="col-md-4", children=[
                                                 html.Div(className="form-group row", children=[
-                                                   
-                                                        html.Button('Run analysis', id='submit-button', n_clicks=0, type="submit", className="col-md-6 form-control btn btn-secondary"),
-                                                        html.Div(id="results-button", className='col-md-6')
+                                                    html.Div(className='col-md-6', children=[html.Button('Run analysis', id='submit-button', n_clicks=0, type="submit", className="text-nowrap form-control btn btn-secondary")]),
+                                                    html.Div(className='col-md-6', id="results-button")
                                                     
                                                 ])
                                             ])
@@ -143,7 +156,14 @@ app.layout = html.Div(children=[
         ])
     ]),
 
-   
+    html.Section(children=[
+      html.Div(className="container", children=[
+        html.Div(className="row mb-5", children=[
+            html.Div(className="col-md", children=[
+                ])
+            ])
+        ])
+    ])
     
 ])
             
@@ -190,10 +210,7 @@ def save_file(contents, file_name, date):
     df.to_csv(new_file)
     return new_file
 
-def post_it(error_msg):
-    return  html.Div(className="post-it yellow", children=[
-                html.Span(error_msg, className="error-message")
-                ])
+
    
 def make_download_button(folder=None, f_name=None, disabled=True):
     if folder is not None and f_name is not None:
@@ -205,7 +222,7 @@ def make_download_button(folder=None, f_name=None, disabled=True):
         action='/' + uri,
         method="get",
         children=[
-            html.Button('Download results', className="form-control btn btn-secondary", type="submit", disabled=disabled)
+            html.Button('Download results', className="text-nowrap form-control btn btn-secondary", type="submit", disabled=disabled)
         ]
     )
     return button
@@ -251,17 +268,18 @@ def run_analysis(n_clicks,range,samples,effects,repeats,cpus,analysis,data):
     if n_clicks is not None:
         df = None
         if data is None:
-            return (make_download_button(), '', 1, post_it('Please upload a data file to begin'))
+            return (make_download_button(), '', 1, post_it('Please upload a data file to begin', 'green'))
         if len(analysis)==0:
-            return (make_download_button(), '', 1, post_it('Please choose at least one analysis type'))
+            return (make_download_button(), '', 1, post_it('Please choose at least one analysis type!', 'pink'))
         try:
             df = pd.read_csv(data)
             data_dir = os.path.dirname(data)
             f = pa.main_ui(df, range, samples, effects, repeats, analysis, cpus, data)
-            return make_download_button(data_dir, f, False), '', 1, ''
+            return (make_download_button(data_dir, f, False), '', 1, post_it('Your analysis is ready! Click the download button below.', 'blue'))
             #return make_download_link(data_dir, f), None
         except Exception as e:
-            return (make_download_button(), '', 1, post_it('An error occurred<p>' + str(e)))
+            
+            return (make_download_button(), '', 1, post_it('An error occurred<p>' + str(e), 'orange'))
     return make_download_button(), None, 1, ''
 
 if __name__ == '__main__':

@@ -44,9 +44,15 @@ button:disabled {
   cursor: not-allowed;
   pointer-events: all !important;
 }
-
+.papy-heading {
+	padding:20px;
+      font-size: 60px;
+      color: #000000;
+      line-height: 1.2;
+      font-weight: 900;
+}
 .post-it {
-	font-family:"Nunito";
+	font-family:"Nunito Sans";
 	position:absolute;
 	
 	z-index:1;
@@ -57,13 +63,10 @@ button:disabled {
     padding: 15px;
     -ms-transform: rotate(-2deg); /* IE 9 */
     -webkit-transform: rotate(-5deg); /* Safari */
-    transform: rotate(-5deg);
+    transform: rotate(-4deg);
     box-shadow: 3px 12px 4px -4px rgba(0, 0, 0, 0.26), 3px 12px 4px -4px rgba(0, 0, 0, 0.26) !important;
 }
-.whitish {
-	background-color: #fbfbfb;
-	border-top:solid 20px #fcfcfc;
-}
+
 .blue {
 	background-color: #b6ffff;
 	border-top:solid 20px #c5ffff;
@@ -88,9 +91,12 @@ button:disabled {
   color: #ffffff;
   text-align: left;
   font-style: italic;
-  
+  white-space: nowrap !important; 
 }
-  
+.shadow-panel {
+	margin: 5px;
+    padding: 20px;
+}
 html {
   font-family: sans-serif;
   line-height: 1.15;

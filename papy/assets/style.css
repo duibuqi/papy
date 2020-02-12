@@ -53,13 +53,13 @@ button:disabled {
 }
 .post-it {
 	--font-family:"Indie Flower";
-	--font-family:"Architects Daughter";
-	font-family:"Rock Salt";
+	font-family:"Architects Daughter";
+	--font-family:"Rock Salt";
 	position:absolute;
 	
 	z-index:1;
 	word-wrap: break-word;
-	width:350px;
+	width:320px;
 	/*height:150px;*/ 
 	margin: 2px;	
     padding: 15px;

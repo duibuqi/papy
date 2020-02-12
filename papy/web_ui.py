@@ -112,12 +112,11 @@ app.layout = html.Div(className='shadow-panel', children=[
                                         ]),
                                         html.Div(id="please-wait", className="row invisible", children=[ 
                                             html.Div(className='col-md-8'),
-                                            html.H3(className='col-md-4', children=[
+                                            html.H2(className='col-md-4', children=[
                                                 post_it('Please wait! Your analysis is running...', 'yellow')
                                             ])
                                         ]),
                                         html.Div(className="row", children=[
-                                             #html.H3(id='user-msg', className='col-md-3'),
                                              html.Div(className="text-right col-md-8", children=[
                                                 html.Div(className="form-group", children=[
                                                     html.Div(className="form-field", children=[ 
@@ -129,12 +128,9 @@ app.layout = html.Div(className='shadow-panel', children=[
                                                         value=[0,1],
                                                         labelStyle={'padding':'10px', 'color':'white', 'fontSize': '20px'}
                                                     )  
-                                                    ])  
-                                                    
+                                                    ])                                                      
                                                 ])
-                                            ]),
-                                            
-                                           
+                                            ]),                                                               
                                             html.Div(className="col-md-4", children=[
                                                 html.Div(className="form-group row", children=[
                                                     html.Div(className='col-md-6', children=[html.Button('Run analysis', id='submit-button', n_clicks=0, type="submit", className="text-nowrap form-control btn btn-secondary")]),
@@ -148,11 +144,9 @@ app.layout = html.Div(className='shadow-panel', children=[
                             ])
                         ])
                     ]), 
-                   
-                                            
+                                                              
                     dcc.Loading(id="loading-1", children=[html.Div(id="pretty-spinner")], type='dot', color='#001166'),                   
-                    dcc.Store(id='store', storage_type='memory'),
-                    dcc.Input(id='id_hidden_results', type='hidden'),        
+                    dcc.Store(id='store', storage_type='memory'),        
                     html.Div(id='trigger',children=0, style=dict(display='none')),
                     html.Div(id='other-element'),
                     html.Div(className='row', children=[             
@@ -187,14 +181,14 @@ def trigger_function(n_clicks,trigger):
     print('trigger context', context)
     if context == 'submit-button':
         if n_clicks > 0 :
-            print('button will be disabled')
-            return True, 'invisible', 'row visible'      
+            print('button will be disabled, user message is invisible')
+            return (True, 'invisible', 'row visible')      
         else:
-            print('button will be enabled')
-            return False, 'visible', 'row invisible'
+            print('button will be enabled, user message is visible')
+            return (False, 'visible', 'row invisible')
     else:
-        print('button will be enabled')
-        return False, 'visible', 'row invisible'
+        print('button will be enabled, user message is visible')
+        return (False, 'visible', 'row invisible')
 
 def save_file(contents, file_name, date):
    

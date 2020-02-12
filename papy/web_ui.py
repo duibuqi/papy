@@ -111,9 +111,9 @@ app.layout = html.Div(className='shadow-panel', children=[
                                             ])
                                         ]),
                                         html.Div(id="please-wait", className="row invisible", children=[ 
-                                            html.Div(className='col-md-8'),
-                                            html.H2(className='col-md-4', children=[
-                                                post_it('Please wait! Your analysis is running...', 'yellow')
+                                            html.Div(className='col-md-5'),
+                                            html.H2(className='col-md-7', children=[
+                                                post_it('Please wait; the analysis may take a few minutes...', 'yellow')
                                             ])
                                         ]),
                                         html.Div(className="row", children=[
@@ -180,12 +180,8 @@ def trigger_function(n_clicks,trigger):
     context_value = dash.callback_context.triggered[0]['value']
     print('trigger context', context)
     if context == 'submit-button':
-        if n_clicks > 0 :
-            print('button will be disabled, user message is invisible')
-            return (True, 'invisible', 'row visible')      
-        else:
-            print('button will be enabled, user message is visible')
-            return (False, 'visible', 'row invisible')
+        print('button will be disabled, user message is invisible')
+        return (True, 'invisible', 'row visible')      
     else:
         print('button will be enabled, user message is visible')
         return (False, 'visible', 'row invisible')

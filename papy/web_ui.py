@@ -5,10 +5,7 @@ from dash.dependencies import Input, Output, State
 from flask import send_file
 import pandas as pd
 import numpy as np  
-import base64
-import io
-import os
-import datetime
+import base64, io, os, datetime, time
 import pa
 import shutil
 from collections import deque
@@ -214,7 +211,6 @@ def save_file(contents, file_name, date):
     print('saving file', file_name)
     user_dir_path = os.path.join(UPLOAD_DIRECTORY, str(datetime.datetime.now().timestamp()) )
     if not os.path.exists(user_dir_path):
-        print('making directory', user_dir_path)
         os.makedirs(user_dir_path)
 
     new_file = os.path.join(user_dir_path, file_name)
@@ -252,10 +248,10 @@ def serve_static(path):
 def load_data_file(contents, file_name, mod_date):
     children = [ html.Div(file_name)]
     saved_file = None
-    print('in load_data_file with', file_name)
+   
     if contents is not None and file_name is not None:
         children=[html.Div(file_name)]
-        print("about to save", file_name)
+       
         saved_file = save_file(contents, file_name, mod_date)
     return children, saved_file
 
@@ -284,12 +280,14 @@ def run_analysis(n_clicks,range,samples,effects,repeats,cpus,analysis,data):
         try:
             df = pd.read_csv(data)
             data_dir = os.path.dirname(data)
-            f = pa.main_ui(df, range, samples, effects, repeats, analysis, cpus, data)
-            return (make_download_button(data_dir, f, False), '', 1, post_it('Your analysis is ready - click below to download your results.', 'blue'))
+            #f = pa.main_ui(df, range, samples, effects, repeats, analysis, cpus, data)
+            time.sleep(10)
+            f = 'tmp'
+            return (make_download_button(data_dir, f, False), '', 1, post_it('Your analysis is complete - click below to download your results.', 'yellow'))
             #return make_download_link(data_dir, f), None
         except Exception as e:
             
-            return (make_download_button(), '', 1, post_it('An error occurred<p>' + str(e), 'orange'))
+            return (make_download_button(), '', 1, post_it('Oh dear... ' + str(e), 'pink'))
     return make_download_button(), None, 1, ''
 
 if __name__ == '__main__':

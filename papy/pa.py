@@ -2643,7 +2643,6 @@ def main_ui(argv1, argv2, argv3, argv4, argv5, argv6, argv7, results_file):
         rows = 1
         cols = XSRV.shape[0]
 
-    print('Input data matrix size is :' + str(rows) + ',' + str(cols))
 
     tmpStr = argv2.split('-')
     if len(tmpStr) > 1:
@@ -2700,7 +2699,7 @@ def main_ui(argv1, argv2, argv3, argv4, argv5, argv6, argv7, results_file):
     if not os.path.exists(output_folder):
         os.makedirs(output_folder)
         
-    print("output_folder is", output_folder)
+    #print("output_folder is", output_folder)
     
     ##save the effect sizes and sample sizes
     file_handle = open(output_folder + '/effect_n_sample_sizes.txt', 'a')

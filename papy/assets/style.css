@@ -52,7 +52,9 @@ button:disabled {
       font-weight: 900;
 }
 .post-it {
-	font-family:"Nunito Sans";
+	--font-family:"Indie Flower";
+	--font-family:"Architects Daughter";
+	font-family:"Rock Salt";
 	position:absolute;
 	
 	z-index:1;
@@ -61,31 +63,31 @@ button:disabled {
 	/*height:150px;*/ 
 	margin: 2px;	
     padding: 15px;
-    -ms-transform: rotate(-2deg); /* IE 9 */
-    -webkit-transform: rotate(-5deg); /* Safari */
-    transform: rotate(-4deg);
-    box-shadow: 3px 12px 4px -4px rgba(0, 0, 0, 0.26), 3px 12px 4px -4px rgba(0, 0, 0, 0.26) !important;
+    -ms-transform: rotate(-1deg); /* IE 9 */
+    -webkit-transform: rotate(-1deg); /* Safari */
+    transform: rotate(-1deg);
+    box-shadow: 0px 26px 10px -6px rgba(0, 0, 0, 0.26), 0px 10px 26px -6px rgba(0, 0, 0, 0.26) !important;
 }
 
 .blue {
-	background-color: #b6ffff;
-	border-top:solid 20px #c5ffff;
+	background-color: #c5ffff;
+	border-top:solid 25px #b6ffff;
 }
 .yellow {
-	border-top:solid 20px #fffaaa;
+	border-top:solid 25px #fff68f;
 	background-color: #f4fa9d;
 }
 .orange {
-	border-top:solid 20px #f8a123;
-	background-color: #f69011;
+	border-top:solid 25px #f69011;
+	background-color: #f8a123;
 }
 .green {
-	border-top:solid 20px #d4ff88;
-	background-color: #ccff55;
+	border-top:solid 25px #ccff55;
+	background-color: #d4ff88;
 }
 .pink {
-	border-top:solid 20px #ff93ff;
-	background-color: #ff80ff;
+	border-top:solid 25px #ff80ff;
+	background-color: #ff93ff;
 }
 .papy {
   color: #ffffff;

@@ -19,10 +19,14 @@ import plotly.graph_objs as go
 UPLOAD_DIRECTORY = 'user/'
 
 external_stylesheets = [
-    'https://fonts.googleapis.com/css?family=Nunito+Sans:200,300,400,600,700,800,900'
+    'https://fonts.googleapis.com/css?family=Nunito+Sans:200,300,400,600,700,800,900',
+    'https://fonts.googleapis.com/css?family=Architects+Daughter|Indie+Flower|Rock+Salt&display=swap'
+
 ]
 
-app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
+app = dash.Dash(__name__, 
+                external_stylesheets=external_stylesheets,
+                routes_pathname_prefix='/pa/')
 server = app.server
 
 def post_it(error_msg, col):
@@ -109,6 +113,12 @@ app.layout = html.Div(className='shadow-panel', children=[
                                                 ])
                                             ])
                                         ]),
+                                        html.Div(id="please-wait", className="row invisible", children=[ 
+                                            html.Div(className='col-md-8'),
+                                            html.H3(className='col-md-4', children=[
+                                                post_it('Please wait! Your analysis is running...', 'yellow')
+                                            ])
+                                        ]),
                                         html.Div(className="row", children=[
                                              #html.H3(id='user-msg', className='col-md-3'),
                                              html.Div(className="text-right col-md-8", children=[
@@ -168,7 +178,9 @@ app.layout = html.Div(className='shadow-panel', children=[
 ])
             
 @app.callback(
-    Output('submit-button','disabled'),
+    [Output('submit-button','disabled'),
+     Output('user-msg', 'className'),
+     Output('please-wait', 'className')],
     [Input('submit-button','n_clicks'),
      Input('trigger','children')])
 def trigger_function(n_clicks,trigger):
@@ -179,13 +191,13 @@ def trigger_function(n_clicks,trigger):
     if context == 'submit-button':
         if n_clicks > 0 :
             print('button will be disabled')
-            return True          
+            return True, 'invisible', 'row visible'      
         else:
             print('button will be enabled')
-            return False
+            return False, 'visible', 'row invisible'
     else:
         print('button will be enabled')
-        return False
+        return False, 'visible', 'row invisible'
 
 def save_file(contents, file_name, date):
    
@@ -209,9 +221,7 @@ def save_file(contents, file_name, date):
     print('saving', new_file)
     df.to_csv(new_file)
     return new_file
-
-
-   
+  
 def make_download_button(folder=None, f_name=None, disabled=True):
     if folder is not None and f_name is not None:
         uri = os.path.join(folder, f_name)
@@ -268,14 +278,14 @@ def run_analysis(n_clicks,range,samples,effects,repeats,cpus,analysis,data):
     if n_clicks is not None:
         df = None
         if data is None:
-            return (make_download_button(), '', 1, post_it('Please upload a data file to begin', 'green'))
+            return (make_download_button(), '', 1, post_it('Please upload a data file to begin.', 'green'))
         if len(analysis)==0:
             return (make_download_button(), '', 1, post_it('Please choose at least one analysis type!', 'pink'))
         try:
             df = pd.read_csv(data)
             data_dir = os.path.dirname(data)
             f = pa.main_ui(df, range, samples, effects, repeats, analysis, cpus, data)
-            return (make_download_button(data_dir, f, False), '', 1, post_it('Your analysis is ready! Click the download button below.', 'blue'))
+            return (make_download_button(data_dir, f, False), '', 1, post_it('Your analysis is ready - click below to download your results.', 'blue'))
             #return make_download_link(data_dir, f), None
         except Exception as e:
             

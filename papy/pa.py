@@ -30,6 +30,7 @@ import statsmodels.api as sm  # for linear regression ; change statsmodels.formu
 import shutil  # for creating zip files
 from math import fabs, floor, ceil, log, exp
 from datetime import datetime
+import traceback
 
 def iSurfacePlot(output, svfilename, variable, metric, correction, samplsizes,sizeeff,  nreps):
     """
@@ -2627,78 +2628,85 @@ def long_running_process(XSRV, num_cols, outcome_type, numberreps, variable_rang
                 
 def main_ui(argv1, argv2, argv3, argv4, argv5, argv6, argv7, results_file):
     ## read the data into an array;
-    
-    results_dir = os.path.dirname(results_file)
-    print("Results directory is", results_dir)
-    print("Results file is", results_file)
-    XSRV = argv1
-    print(type(XSRV))
-    if (type(XSRV).__name__ != 'ndarray'):
-        XSRV = np.array(XSRV)
-    ##print array size
-    if (XSRV.ndim > 1):
-        rows = XSRV.shape[0]
-        cols = XSRV.shape[1]
-    elif (XSRV.ndim == 1):
-        rows = 1
-        cols = XSRV.shape[0]
+    try: 
+        results_dir = os.path.dirname(results_file)
+        print("Results directory is", results_dir)
+        print("Results file is", results_file)
+        XSRV = argv1
 
-
-    tmpStr = argv2.split('-')
-    if len(tmpStr) > 1:
-        argv2 = [int(tmpStr[0]), int(tmpStr[1]) + 1]
-    else:
-        argv2 = [0, int(argv2)]
-    print('arg 2', argv2)
+        if (type(XSRV).__name__ != 'ndarray'):
+            XSRV = np.array(XSRV)
+        ##print array size
+        if (XSRV.ndim > 1):
+            rows = XSRV.shape[0]
+            cols = XSRV.shape[1]
+        elif (XSRV.ndim == 1):
+            rows = 1
+            cols = XSRV.shape[0]
+       
+        tmpStr = argv2.split('-')
+        if len(tmpStr) > 1:
+            argv2 = [int(tmpStr[0]), int(tmpStr[1]) + 1]
+        else:
+            argv2 = [0, int(argv2)]
+        print('arg 2', argv2)
+        
+        tmpStr = argv3.split(':')
+        argv3 = range(int(tmpStr[0]), int(tmpStr[2]), int(tmpStr[1]))
+        
+        argv3 = np.array(argv3)
+        if argv3[0] < 1:
+             argv3[0] = 1
+        argv3 = np.reshape(argv3, (1, len(argv3)))
+        print('arg 3', argv3)
+        
+        tmpStr = argv4.split(':')
+        argv4 = np.arange(float(tmpStr[0]), float(tmpStr[2]), float(tmpStr[1]))
+        if argv4[0] == 0:
+            argv4[0] = 0.05
+        argv4 = np.array(argv4)
+        argv4 = np.reshape(argv4, (1, len(argv4)))
+        print('arg 4', argv4)
+        
+        variable_range = argv2
+        sampleSizes = argv3  # np.array([[1, 50, 100, 200, 250, 350, 500, 750, 1000]])
+        effectSizes = argv4  # np.array([[0.05, 0.1, 0.15,0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5, 0.55, 0.6, 0.65, 0.7, 0.75, 0.8]])
     
-    tmpStr = argv3.split(':')
-    argv3 = range(int(tmpStr[0]), int(tmpStr[2]), int(tmpStr[1]))
+        ##define output metric options
+        metric_opt = np.array([1, 2, 3, 4])  # see options description below
+        correction_opt = np.array([1, 2, 3, 4])  # see correction options description below
     
-    argv3 = np.array(argv3)
-    if argv3[0] < 1:
-         argv3[0] = 1
-    argv3 = np.reshape(argv3, (1, len(argv3)))
-    print('arg 3', argv3)
+        print('arg 5,6,7', argv5, argv6, argv7)
+        numberreps = int(argv5)
+        outcome_type = argv6
+        # outcome type is a list of options in the UI version
+        if len(outcome_type) == 2:
+            outcome_type = 2
+        else:
+            outcome_type=outcome_type[0]
+        cores = int(argv7)
+       
+        ## ## Calculate for a subset of 4 variables (less than 20 seconds on 4-core desktop for each analysis)
+        diffgroups = np.array([])
+        linearregression = np.array([])
+        t_start = datetime.now()
+        num_cols = int(argv2[1]) - int(argv2[0])
+        ##if the number of variables is less than the request CPU cores, use number of variables as cores.
+        if (num_cols < cores):
+            cores = num_cols
     
-    tmpStr = argv4.split(':')
-    argv4 = np.arange(float(tmpStr[0]), float(tmpStr[2]), float(tmpStr[1]))
-    if argv4[0] == 0:
-        argv4[0] = 0.05
-    argv4 = np.array(argv4)
-    argv4 = np.reshape(argv4, (1, len(argv4)))
-    print('arg 4', argv4)
-    
-    variable_range = argv2
-    sampleSizes = argv3  # np.array([[1, 50, 100, 200, 250, 350, 500, 750, 1000]])
-    effectSizes = argv4  # np.array([[0.05, 0.1, 0.15,0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5, 0.55, 0.6, 0.65, 0.7, 0.75, 0.8]])
-
-    ##define output metric options
-    metric_opt = np.array([1, 2, 3, 4])  # see options description below
-    correction_opt = np.array([1, 2, 3, 4])  # see correction options description below
-
-    print('arg 5,6,7', argv5, argv6, argv7)
-    numberreps = int(argv5)
-    outcome_type = argv6
-    # outcome type is a list of options in the UI version
-    if len(outcome_type) == 2:
-        outcome_type = 2
-    else:
-        outcome_type=outcome_type[0]
-    cores = int(argv7)
-   
-    ## ## Calculate for a subset of 4 variables (less than 20 seconds on 4-core desktop for each analysis)
-    diffgroups = np.array([])
-    linearregression = np.array([])
-    t_start = datetime.now()
-    num_cols = int(argv2[1]) - int(argv2[0])
-    ##if the number of variables is less than the request CPU cores, use number of variables as cores.
-    if (num_cols < cores):
-        cores = num_cols
-             
+    except Exception as inst:
+        #print('error caught in pa.py', sys.exc_info()[0])
+        tb = traceback.format_exc()
+        print(tb)
+        raise Exception( 'Error in input parameters', str(inst))
+     
+              
     output_folder = os.path.join(results_dir, 'papy_output')
     if not os.path.exists(output_folder):
         os.makedirs(output_folder)
-        
+    
+                
     #print("output_folder is", output_folder)
     
     ##save the effect sizes and sample sizes
@@ -2712,9 +2720,23 @@ def main_ui(argv1, argv2, argv3, argv4, argv5, argv6, argv7, results_file):
     long_running_process(XSRV, num_cols, outcome_type, numberreps, variable_range, effectSizes, sampleSizes, cores, output_folder)
     
     user_zip = os.path.basename(results_dir)
-    print('making zip file called', user_zip)
+    print('base name of results_dir is', user_zip)
+   
+    dest_file = os.path.join(results_dir, user_zip + '.zip')
+    abs_file = os.path.abspath(dest_file)
+    print('abspath', abs_file)
+    if os.path.exists(abs_file):
+        print('deleting existing archive')
+        os.remove(abs_file)
+        
     shutil.make_archive(user_zip, 'zip', output_folder)
+    print('made file', user_zip)
+
+       
     shutil.move(user_zip + '.zip', results_dir)
+    print('moved file to', results_dir)
     shutil.rmtree(output_folder)
+    print('returning',user_zip + '.zip')
     return user_zip + '.zip'
+
 

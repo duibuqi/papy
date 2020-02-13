@@ -11,6 +11,7 @@ import shutil
 from collections import deque
 import plotly
 import random
+import multiprocessing
 import plotly.graph_objs as go
 
 UPLOAD_DIRECTORY = 'user/'
@@ -23,7 +24,7 @@ external_stylesheets = [
 
 app = dash.Dash(__name__, 
                 external_stylesheets=external_stylesheets,
-                routes_pathname_prefix='/pa/')
+                routes_pathname_prefix='/spa/')
 server = app.server
 
 def post_it(error_msg, col):
@@ -35,7 +36,6 @@ app.layout = html.Div(className='shadow-panel', children=[
     
     html.Div(className="container-fluid", children=[
         html.Div(className="row", children=[ 
-
             html.Div(className='col-md-8'),
             html.H3(id="user-msg", className='col-md-4')
         ]),
@@ -44,10 +44,12 @@ app.layout = html.Div(className='shadow-panel', children=[
             html.Div(className="col-md-12", children=[
                  
                  html.Div(className="", children=[
-
-                    html.H1('Statistical Power Analysis', className='papy-heading'),     
+                    html.H1('Statistical Power Analysis', className='papy-heading'), 
+                    html.Div(className="row", children=[     
+                        html.Div(className='col-md-5'),   
+                        html.Div('for Metabolomics', className='papy-subheading text-right'),
+                    ]),
                    
-
                     html.Div(className="ftco-search", children=[
                         html.Div(className="row", children=[
                             html.Div(className="col-md-12 nav-link-wrap", children=[
@@ -105,7 +107,7 @@ app.layout = html.Div(className='shadow-panel', children=[
                                                 html.Div('Number of CPUs:',className='papy'),
                                                 html.Div(className="form-group", children=[
                                                     html.Div(className="form-field", children=[
-                                                        dcc.Input(id='id_var_cpus', value='1', type="text", className="form-control")
+                                                        dcc.Input(id='id_var_cpus', value='4', type="text", className="form-control")
                                                     ])
                                                 ])
                                             ])
@@ -170,7 +172,6 @@ app.layout = html.Div(className='shadow-panel', children=[
             
 @app.callback(
     [Output('submit-button','disabled'),
-     Output('user-msg', 'className'),
      Output('post-it', 'children')],
     [Input('submit-button','n_clicks'),
      Input('trigger','children')])
@@ -181,10 +182,10 @@ def trigger_function(n_clicks,trigger):
     print(context, 'triggered:', context_value)
     if context == 'submit-button':
         print('-----> button will be DISABLED')
-        return (True, 'visible', 'Your analysis is running, please wait a few minutes...')      
+        return (True, 'Your analysis is running, please wait a few minutes...')      
     else:
         print('button will be enabled')
-        return (False, 'visible', context_value)
+        return (False, context_value)
 
 def save_file(contents, file_name, date):
    
@@ -228,7 +229,7 @@ def serve_static(path):
     print('in serve_static', path)
     path = os.path.join('user', path)
     t = os.path.abspath(path)
-    return send_file(t, attachment_filename='pa_results.zip', as_attachment = True)
+    return send_file(t, attachment_filename='spa_results.zip', as_attachment = True)
 
 @app.callback([Output('output-data-upload', 'children'), 
                Output('store', 'data')],
@@ -246,6 +247,29 @@ def load_data_file(contents, file_name, mod_date):
     return children, saved_file
 
 
+def count_cores(cores):
+    real_cores = multiprocessing.cpu_count()
+    try:
+        if len(cores.strip()) > 0:
+            tmpInt = int(cores)      
+            if real_cores - 1 <= 0:
+                cores = '1'
+            else:
+                if tmpInt > real_cores:
+                    cores = str(real_cores)           
+        else:
+            
+            if real_cores - 1 <= 0:
+                cores = '1'
+            else:
+                cores = str(real_cores)
+            
+    except ValueError as ve:
+        print('Unable to use values for cpu count; returning 1')
+        cores = '1'
+    print('Going to use %s cores' % cores)
+    return cores
+
 @app.callback([Output('results-button', 'children'),
                Output("pretty-spinner", "children"),
                Output('trigger','children'),
@@ -260,25 +284,41 @@ def load_data_file(contents, file_name, mod_date):
                State('store', 'data')
                ])
 def run_analysis(n_clicks,range,samples,effects,repeats,cpus,analysis,data):
-    print('running main function with n-clicks, data', n_clicks, data)
+    print('data', data)
+    print('range type', type(range))
+    print('samples', samples)
+    print('effects', effects)
+    
     if n_clicks is not None:
         df = None
         if data is None:
-            return (make_download_button(), '', 'Please upload a data file to begin.', post_it('Post-it no data', 'green'))
+            return (make_download_button(), '', 'Please upload a data file to begin.', post_it('', 'green'))
+        if len(range.strip())==0:
+            return (make_download_button(), '', 'Please provide a variable range.', post_it('', 'pink'))
+        if len(samples.strip())==0:
+            return (make_download_button(), '', 'Please provide the range of sample sizes in the format start:interval:end, eg 0:100:500 (not inclusive).', post_it('', 'pink'))
+        if len(effects.strip())==0:
+            return (make_download_button(), '', 'Please provide the range of effect sizes in the format start:interval:end, eg 0.05:0.05:0.7 (not inclusive.)', post_it('', 'pink'))
+        if len(repeats.strip())==0:
+            return (make_download_button(), '', 'Please provide a number of repeats. 10 is worth a try.', post_it('', 'pink'))
+        if len(cpus.strip())==0:
+            return (make_download_button(), '', 'Please provide a variable range.', post_it('', 'pink'))       
         if len(analysis)==0:
-            return (make_download_button(), '', 'Please choose at least one analysis type!', post_it('Post-it no data', 'pink'))
+            return (make_download_button(), '', 'Please choose at least one analysis type!', post_it('', 'pink'))
+        
+        print('calling count_cpus')
+        cpus = count_cores(cpus)
+        
         try:
             df = pd.read_csv(data)
             data_dir = os.path.dirname(data)
-            #f = pa.main_ui(df, range, samples, effects, repeats, analysis, cpus, data)
-            time.sleep(10)
-            f = 'tmp'
-            return (make_download_button(data_dir, f, False), '', 'Your analysis is complete - click below to download your results.', post_it('Post-it ready', 'yellow'))
+            f = pa.main_ui(df, range, samples, effects, repeats, analysis, cpus, data)
+            return (make_download_button(data_dir, f, False), '', 'Your analysis is complete - click below to download your results.', post_it('', 'yellow'))
             #return make_download_link(data_dir, f), None
         except Exception as e:
             
-            return (make_download_button(), '', 'Error', post_it('Oh dear... ' + str(e), 'pink'))
-    return make_download_button(), None, 'Last resort state', ''
+            return (make_download_button(), '', 'Error: ' + str(e), post_it('', 'pink'))
+    return (make_download_button(), None, 'Last resort state', '')
 
 if __name__ == '__main__':
     app.run_server(debug=True)

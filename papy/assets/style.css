@@ -45,11 +45,18 @@ button:disabled {
   pointer-events: all !important;
 }
 .papy-heading {
-	padding:20px;
+	padding:1px;
       font-size: 60px;
       color: #000000;
       line-height: 1.2;
       font-weight: 900;
+}
+.papy-subheading {
+	font-style: italic;
+    font-size: 36px;
+    color: #000000;
+    line-height: 1.2;
+    font-weight: 400;
 }
 .post-it {
 	--font-family:"Indie Flower";

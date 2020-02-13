@@ -28,7 +28,7 @@ server = app.server
 
 def post_it(error_msg, col):
     return  html.Div(className="post-it " + col, children=[
-                html.Span(error_msg, className="error-message")
+                html.Span(error_msg, id='post-it', className="error-message")
                 ])
     
 app.layout = html.Div(className='shadow-panel', children=[
@@ -171,20 +171,20 @@ app.layout = html.Div(className='shadow-panel', children=[
 @app.callback(
     [Output('submit-button','disabled'),
      Output('user-msg', 'className'),
-     Output('please-wait', 'className')],
+     Output('post-it', 'children')],
     [Input('submit-button','n_clicks'),
      Input('trigger','children')])
 def trigger_function(n_clicks,trigger):
    
     context = dash.callback_context.triggered[0]['prop_id'].split('.')[0]
     context_value = dash.callback_context.triggered[0]['value']
-    print('trigger context', context)
+    print(context, 'triggered:', context_value)
     if context == 'submit-button':
-        print('button will be disabled, user message is invisible')
-        return (True, 'invisible', 'row visible')      
+        print('-----> button will be DISABLED')
+        return (True, 'visible', 'Your analysis is running, please wait a few minutes...')      
     else:
-        print('button will be enabled, user message is visible')
-        return (False, 'visible', 'row invisible')
+        print('button will be enabled')
+        return (False, 'visible', context_value)
 
 def save_file(contents, file_name, date):
    
@@ -264,21 +264,21 @@ def run_analysis(n_clicks,range,samples,effects,repeats,cpus,analysis,data):
     if n_clicks is not None:
         df = None
         if data is None:
-            return (make_download_button(), '', 1, post_it('Please upload a data file to begin.', 'green'))
+            return (make_download_button(), '', 'Please upload a data file to begin.', post_it('Post-it no data', 'green'))
         if len(analysis)==0:
-            return (make_download_button(), '', 1, post_it('Please choose at least one analysis type!', 'pink'))
+            return (make_download_button(), '', 'Please choose at least one analysis type!', post_it('Post-it no data', 'pink'))
         try:
             df = pd.read_csv(data)
             data_dir = os.path.dirname(data)
             #f = pa.main_ui(df, range, samples, effects, repeats, analysis, cpus, data)
             time.sleep(10)
             f = 'tmp'
-            return (make_download_button(data_dir, f, False), '', 1, post_it('Your analysis is complete - click below to download your results.', 'yellow'))
+            return (make_download_button(data_dir, f, False), '', 'Your analysis is complete - click below to download your results.', post_it('Post-it ready', 'yellow'))
             #return make_download_link(data_dir, f), None
         except Exception as e:
             
-            return (make_download_button(), '', 1, post_it('Oh dear... ' + str(e), 'pink'))
-    return make_download_button(), None, 1, ''
+            return (make_download_button(), '', 'Error', post_it('Oh dear... ' + str(e), 'pink'))
+    return make_download_button(), None, 'Last resort state', ''
 
 if __name__ == '__main__':
     app.run_server(debug=True)

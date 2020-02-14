@@ -13,7 +13,11 @@ import plotly
 import random
 import multiprocessing
 import plotly.graph_objs as go
+import warnings, sys
 
+if not sys.warnoptions:
+    warnings.simplefilter("ignore")
+    
 UPLOAD_DIRECTORY = 'user/'
 
 external_stylesheets = [
@@ -179,12 +183,17 @@ def trigger_function(n_clicks,trigger):
    
     context = dash.callback_context.triggered[0]['prop_id'].split('.')[0]
     context_value = dash.callback_context.triggered[0]['value']
-    print(context, 'triggered:', context_value)
+    print('===========================================')
+    print('Trigger was %s, click count is %d' % (context, n_clicks))
     if context == 'submit-button':
-        print('-----> button will be DISABLED')
+        print('submit button will be DISABLED')
+        print('===========================================') 
+
         return (True, 'Your analysis is running, please wait a few minutes...')      
     else:
-        print('button will be enabled')
+        print('submit button will be ENABLED, message is', context_value)
+        print('===========================================') 
+
         return (False, context_value)
 
 def save_file(contents, file_name, date):
@@ -241,8 +250,7 @@ def load_data_file(contents, file_name, mod_date):
     saved_file = None
    
     if contents is not None and file_name is not None:
-        children=[html.Div(file_name)]
-       
+        children=[html.Div(file_name)]       
         saved_file = save_file(contents, file_name, mod_date)
     return children, saved_file
 
@@ -267,7 +275,7 @@ def count_cores(cores):
     except ValueError as ve:
         print('Unable to use values for cpu count; returning 1')
         cores = '1'
-    print('Going to use %s cores' % cores)
+    print('========= Analysis will use %s cores ==========' % cores)
     return cores
 
 @app.callback([Output('results-button', 'children'),
@@ -284,8 +292,9 @@ def count_cores(cores):
                State('store', 'data')
                ])
 def run_analysis(n_clicks,range,samples,effects,repeats,cpus,analysis,data):
+    print('------------- starting run %s -------------' % str(datetime.datetime.now()))
     print('data', data)
-    print('range type', type(range))
+    print('range', range)
     print('samples', samples)
     print('effects', effects)
     
@@ -306,7 +315,6 @@ def run_analysis(n_clicks,range,samples,effects,repeats,cpus,analysis,data):
         if len(analysis)==0:
             return (make_download_button(), '', 'Please choose at least one analysis type!', post_it('', 'pink'))
         
-        print('calling count_cpus')
         cpus = count_cores(cpus)
         
         try:

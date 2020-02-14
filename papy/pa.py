@@ -913,7 +913,6 @@ def f_multiproc_cont(sampSizes, signThreshold, effectSizes, numVars, nRepeats, n
 
         output.append(storeVar)
 
-    print('|| \n')
     output.append(output_all_uncTP_tmp)
     output.append(output_all_bonfTP_tmp)
     output.append(output_all_bhTP_tmp)
@@ -1174,7 +1173,7 @@ def f_multiproc(sampSizes, signThreshold, effectSizes, numVars, nRepeats, nSampS
         numVars = cols - int(round(cols / cores)) * (cores - 1)
 
     # debug
-    print("numVars=%d; current core=%d" % (numVars, currCore))
+    #print("numVars=%d; current core=%d" % (numVars, currCore))
     ##for storing all results in all repeated steps with all effect sizes and sample
     ##sizes for Power (TP) in current samples_seg
     output_all_uncTP_tmp = np.zeros((nEffSizes, nSampSizes, numVars, nRepeats))
@@ -1458,7 +1457,6 @@ def f_multiproc(sampSizes, signThreshold, effectSizes, numVars, nRepeats, nSampS
                 storeVar[3][i] = byStruct[stats[i]]
 
         output.append(storeVar)
-    print('| \n')
     output.append(output_all_uncTP_tmp)
     output.append(output_all_bonfTP_tmp)
     output.append(output_all_bhTP_tmp)
@@ -2289,7 +2287,7 @@ def long_running_process(XSRV, num_cols, outcome_type, numberreps, variable_rang
     
     if (num_cols > 0):
         if (outcome_type == 0 or outcome_type == 2):
-            print('1 - calling PCalc_2Group')
+ 
             diffgroups, output_uncTP_ratio_median, output_bonfTP_ratio_median, output_bhTP_ratio_median, output_byTP_ratio_median, \
             output_uncTP_ratio_iqr, output_bonfTP_ratio_iqr, output_bhTP_ratio_iqr, output_byTP_ratio_iqr, \
             output_uncTP, output_bonfTP, output_bhTP, output_byTP \
@@ -2297,7 +2295,7 @@ def long_running_process(XSRV, num_cols, outcome_type, numberreps, variable_rang
             
             
         if (outcome_type == 1 or outcome_type == 2):
-            print('1 - calling PCalc_Continuous')
+
             linearregression, output_uncTP_ratio_median_ln, output_bonfTP_ratio_median_ln, output_bhTP_ratio_median_ln, output_byTP_ratio_median_ln, \
             output_uncTP_ratio_iqr_ln, output_bonfTP_ratio_iqr_ln, output_bhTP_ratio_iqr_ln, output_byTP_ratio_iqr_ln, \
                     output_uncTP, output_bonfTP, output_bhTP, output_byTP \
@@ -2306,13 +2304,13 @@ def long_running_process(XSRV, num_cols, outcome_type, numberreps, variable_rang
     else:
         
         if (outcome_type == 0 or outcome_type == 2):
-            print('2 - calling PCalc_2Group')
+
             diffgroups, output_uncTP_ratio_median, output_bonfTP_ratio_median, output_bhTP_ratio_median, output_byTP_ratio_median, \
             output_uncTP_ratio_iqr, output_bonfTP_ratio_iqr, output_bhTP_ratio_iqr, output_byTP_ratio_iqr, \
             output_uncTP, output_bonfTP, output_bhTP, output_byTP \
                 = PCalc_2Group(XSRV, effectSizes, sampleSizes, 0.05, 5000, numberreps, cores)
         if (outcome_type == 1 or outcome_type == 2):
-            print('2 - calling PCalc_Continuous')
+
             linearregression, output_uncTP_ratio_median_ln, output_bonfTP_ratio_median_ln, output_bhTP_ratio_median_ln, output_byTP_ratio_median_ln, \
             output_uncTP_ratio_iqr_ln, output_bonfTP_ratio_iqr_ln, output_bhTP_ratio_iqr_ln, output_byTP_ratio_iqr_ln, \
             output_uncTP, output_bonfTP, output_bhTP, output_byTP \
@@ -2330,7 +2328,7 @@ def long_running_process(XSRV, num_cols, outcome_type, numberreps, variable_rang
 
             if (outcome_type == 0 or outcome_type == 2):
                 t = output_folder + '/diffgroups-%s.csv' % (sv_filenames[jj][kk])
-                print('making csv file', t)
+                #print('making csv file', t)
                 file_handle = open(t, 'a')
                 title_str = np.append(np.array([['Variables', 'Effect Sizes (Sample Sizes in Columns)']]), sampleSizes.astype('str'), axis=1)
                 np.savetxt(file_handle, title_str, delimiter=',', fmt='%s')
@@ -2700,16 +2698,11 @@ def main_ui(argv1, argv2, argv3, argv4, argv5, argv6, argv7, results_file):
         tb = traceback.format_exc()
         print(tb)
         raise Exception( 'Error in input parameters', str(inst))
-     
-              
+                   
     output_folder = os.path.join(results_dir, 'papy_output')
     if not os.path.exists(output_folder):
         os.makedirs(output_folder)
-    
-                
-    #print("output_folder is", output_folder)
-    
-    ##save the effect sizes and sample sizes
+
     file_handle = open(output_folder + '/effect_n_sample_sizes.txt', 'a')
     np.savetxt(file_handle, np.array(['effect sizes']), fmt='%s')
     np.savetxt(file_handle, effectSizes, delimiter=",", fmt='%.3f')
@@ -2720,7 +2713,6 @@ def main_ui(argv1, argv2, argv3, argv4, argv5, argv6, argv7, results_file):
     long_running_process(XSRV, num_cols, outcome_type, numberreps, variable_range, effectSizes, sampleSizes, cores, output_folder)
     
     user_zip = os.path.basename(results_dir)
-    print('base name of results_dir is', user_zip)
    
     dest_file = os.path.join(results_dir, user_zip + '.zip')
     abs_file = os.path.abspath(dest_file)
@@ -2728,15 +2720,15 @@ def main_ui(argv1, argv2, argv3, argv4, argv5, argv6, argv7, results_file):
     if os.path.exists(abs_file):
         print('deleting existing archive')
         os.remove(abs_file)
-        
+    print('Zipping up results')   
     shutil.make_archive(user_zip, 'zip', output_folder)
-    print('made file', user_zip)
-
-       
+    print('made file', user_zip)   
+    
     shutil.move(user_zip + '.zip', results_dir)
     print('moved file to', results_dir)
     shutil.rmtree(output_folder)
-    print('returning',user_zip + '.zip')
+    print('Deleted output folder')
+
     return user_zip + '.zip'
 
 

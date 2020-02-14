@@ -2284,7 +2284,7 @@ if __name__ == "__main__":
 Modifications to main function to support web ui
 '''    
 def long_running_process(XSRV, num_cols, outcome_type, numberreps, variable_range, effectSizes, sampleSizes, cores, output_folder):
-    
+    print("Starting analysis")
     if (num_cols > 0):
         if (outcome_type == 0 or outcome_type == 2):
  
@@ -2322,13 +2322,13 @@ def long_running_process(XSRV, num_cols, outcome_type, numberreps, variable_rang
                              ['stnn', 'stnb', 'stnbh', 'stnby'], ['sfnn', 'sfnb', 'sfnbh', 'sfnby'], \
                              ['sfpn', 'sfpb', 'sfpbh', 'sfpby'], ['tpn', 'tpb', 'tpbh', 'tpby']])
 
-    
+    print('Making csv files')
     for jj in range(0, sv_filenames.shape[0]):
         for kk in range(0, sv_filenames.shape[1]):
 
             if (outcome_type == 0 or outcome_type == 2):
                 t = output_folder + '/diffgroups-%s.csv' % (sv_filenames[jj][kk])
-                #print('making csv file', t)
+               
                 file_handle = open(t, 'a')
                 title_str = np.append(np.array([['Variables', 'Effect Sizes (Sample Sizes in Columns)']]), sampleSizes.astype('str'), axis=1)
                 np.savetxt(file_handle, title_str, delimiter=',', fmt='%s')
@@ -2369,6 +2369,7 @@ def long_running_process(XSRV, num_cols, outcome_type, numberreps, variable_rang
         8 iSlicesPlot() two for each of the above, different secions
         1 iSurfacePlot() mean_diffgroups_array or mean_linearregression_array
     '''
+    print("Making HTML files")
     if (outcome_type == 0 or outcome_type == 2):
         ##plot the surfaces of power rate acrossing the combination of effectSize and SampleSize (classfied)
         iSurfacePlotTPR(output_uncTP_ratio_median, output_folder + '/plot-power-rate-noCorrection-diffgroups.html',
@@ -2467,7 +2468,7 @@ def long_running_process(XSRV, num_cols, outcome_type, numberreps, variable_rang
                     'Effect Size', 'tpby', 'Sample Size=', sampleSizes[:, slice_cols])
         
     if (outcome_type == 1 or outcome_type == 2):
-        #print('2 - Making html files with some plotting')
+
         ##plot the surfaces of power rate acrossing the combination of effectSize and SampleSize (linear regression)
         iSurfacePlotTPR(output_uncTP_ratio_median_ln, output_folder + '/plot-power-rate-noCorrection-linearregression.html',
                         'no correction', sampleSizes, effectSizes, numberreps)
@@ -2569,6 +2570,8 @@ def long_running_process(XSRV, num_cols, outcome_type, numberreps, variable_rang
     ##save and plot surface of mean of each variable;
     ##sv_filenames.shape[0] is the dimension of metric options;
     ##sv_filenames.shape[1] is the dimension of correction options
+    
+    print("Making surface CSVs")
     for jj in range(0, sv_filenames.shape[0]):
         for kk in range(0, sv_filenames.shape[1]):
 
@@ -2629,7 +2632,7 @@ def main_ui(argv1, argv2, argv3, argv4, argv5, argv6, argv7, results_file):
     try: 
         results_dir = os.path.dirname(results_file)
         print("Results directory is", results_dir)
-        print("Results file is", results_file)
+        print("Data file is", results_file)
         XSRV = argv1
 
         if (type(XSRV).__name__ != 'ndarray'):

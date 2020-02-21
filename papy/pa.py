@@ -55,6 +55,7 @@ def iSurfacePlot(output, svfilename, variable, metric, correction, samplsizes,si
     :type nreps: int
     :return:
     """
+   
     import plotly as py
     import plotly.graph_objs as go
     MUtot = output[variable - 1][correction - 1][metric - 1]
@@ -155,6 +156,7 @@ def iSlicesPlot(X, Y, Error_y, svfilename, plot_title, x_caption, y_caption, tra
     :type trace_num: array
     :return:
     """
+  
     import plotly as py
     import plotly.graph_objs as go
 
@@ -270,6 +272,7 @@ def iSurfacePlotTPR(output, svfilename, correction, samplsizes, sizeeff, nreps):
     :type nreps: int
     :return:
     """
+    
     import plotly as py
     import plotly.graph_objs as go
     MUtot = output
@@ -343,7 +346,7 @@ def simulateLogNormal(data, covType, nSamples):
     ## find offset and offset the data. Why to do this?
     offset = fabs(np.amin(data)) + 1
     offData = data + offset
-
+    print("In simulateLogNormal() with data", data.shape)
     ##log on the data array
     logData = np.log(offData)
 
@@ -395,6 +398,7 @@ def PCalc_Continuous(data, EffectSizes, SampSizes, SignThreshold, nSimSamp, nRep
     :type cores: int
     :return:
     """
+    print("In PCalc_Continuous()")
     ##If sample size bigger than number of simulated samples adjust it
     sampSizes = SampSizes
     signThreshold = SignThreshold
@@ -484,6 +488,7 @@ def PCalc_Continuous(data, EffectSizes, SampSizes, SignThreshold, nSimSamp, nRep
     output_byTP = np.array(output3[num_overall_results + 3])
 
     if cores > 1:
+        print('Preparing for multiple cores %d' % cores)
         for ii in range(1, cores - 1):
             for novr in range(num_overall_results):
                 output.append(output3[ii * (num_overall_results + 4) + novr])
@@ -511,6 +516,7 @@ def PCalc_Continuous(data, EffectSizes, SampSizes, SignThreshold, nSimSamp, nRep
                                 output3[(cores - 1) * (num_overall_results + 4) + rest_num_overall_results + 3], axis=2)
 
     output = np.array(output)
+    print("Got output shape", output.shape)
     ##for the mean proportion of number of variables achieve the power; and the std
     output_uncTP_ratio_median = np.zeros((nEffSizes, nSampSizes))
     output_bonfTP_ratio_median = np.zeros((nEffSizes, nSampSizes))
@@ -521,7 +527,7 @@ def PCalc_Continuous(data, EffectSizes, SampSizes, SignThreshold, nSimSamp, nRep
     output_bonfTP_ratio_iqr = np.zeros((nEffSizes, nSampSizes))
     output_bhTP_ratio_iqr = np.zeros((nEffSizes, nSampSizes))
     output_byTP_ratio_iqr = np.zeros((nEffSizes, nSampSizes))
-
+    
     for currEff in range(0, nEffSizes):
         for currSamp in range(0, nSampSizes):
             tmp_median_array = np.zeros(nRepeats)
@@ -611,6 +617,7 @@ def f_multiproc_cont(sampSizes, signThreshold, effectSizes, numVars, nRepeats, n
     :type currCore: int
     :return:
     """
+   
     ##re-check numVars
     offSet = currCore * int(round(cols / cores))
     if (currCore < (cores - 1)):
@@ -952,6 +959,7 @@ def PCalc_2Group(data, EffectSizes, SampSizes, SignThreshold, nSimSamp, nRepeat,
     :type cores: int
     :return:
     """
+    print("In PCalc_2Group()")
     ##If sample size bigger than number of simulated samples adjust it
     ## global sampSizes, signThreshold, effectSizes, numVars, nRepeats, nSampSizes, nEffSizes, Samples_seg, correlationMat_seg, output2
     ## global output2
@@ -1020,7 +1028,7 @@ def PCalc_2Group(data, EffectSizes, SampSizes, SignThreshold, nSimSamp, nRepeat,
             ## f_multiproc(ii)
     ##pass the results to output
     output = []
-
+    
     ##work out number of overall results and number of power rate results
     num_overall_results = int(round(numVars / cores))
     for novr in range(num_overall_results):
@@ -1038,6 +1046,7 @@ def PCalc_2Group(data, EffectSizes, SampSizes, SignThreshold, nSimSamp, nRepeat,
     output_byTP = np.array(output3[num_overall_results + 3])
 
     if cores > 1:
+        print("Using %d cores... " % cores)
         for ii in range(1, cores - 1):
             for novr in range(num_overall_results):
                 output.append(output3[ii * (num_overall_results + 4) + novr])
@@ -1065,6 +1074,7 @@ def PCalc_2Group(data, EffectSizes, SampSizes, SignThreshold, nSimSamp, nRepeat,
                                 output3[(cores - 1) * (num_overall_results + 4) + rest_num_overall_results + 3], axis=2)
 
     output = np.array(output)
+    print("Got output shape", output.shape)
     ##for the mean proportion of number of variables achieve the power; and the std
     output_uncTP_ratio_median = np.zeros((nEffSizes, nSampSizes))
     output_bonfTP_ratio_median = np.zeros((nEffSizes, nSampSizes))
@@ -1166,6 +1176,8 @@ def f_multiproc(sampSizes, signThreshold, effectSizes, numVars, nRepeats, nSampS
         :return:
         """
     ##re-check numVars
+  
+    
     offSet = currCore * int(round(cols / cores))
     if (currCore < (cores - 1)):
         numVars = int(round(cols / cores))
@@ -1519,10 +1531,11 @@ def fdr_bh(*args):
     """
     Function false discovery rate by Benjamini-Hochberg correction
 
-
+    
     :param args:
     :return:
     """
+
     try:
         pvals = args[0]
         ##convert to numpy array type if not the ndarray type
@@ -1643,6 +1656,7 @@ def calcConfMatrixUniv(p, corrVector, signThreshold, corrThresh):
     :type corrThresh: float
     :return:
     """
+
     TP = 0.0
     TN = 0.0
     FP = 0.0
@@ -1715,6 +1729,7 @@ def read2array(filename):
 
 
 def main(argv1, argv2, argv3, argv4, argv5, argv6, argv7):
+    print('------------- starting main %s -------------' % str(datetime.now()))
     ## read the data into an array;
     XSRV = read2array(argv1)
     if (type(XSRV).__name__ != 'ndarray'):
@@ -1763,6 +1778,13 @@ def main(argv1, argv2, argv3, argv4, argv5, argv6, argv7):
 
     cores = int(argv7)
 
+    print('arg 2', argv2)
+    print('arg 3', argv3)
+    print('arg 4', argv4)
+    print('repeats', argv5)
+    print('analysis type', argv6)
+    print('cores', argv7)
+        
     ## ## Calculat for a subset of 4 variables (less than 20 seconds on 4-core desktop for each analysis)
     diffgroups = np.array([])
     linearregression = np.array([])
@@ -1802,6 +1824,8 @@ def main(argv1, argv2, argv3, argv4, argv5, argv6, argv7):
                 = PCalc_Continuous(XSRV, effectSizes, sampleSizes, 0.05, 5000, numberreps, cores)
         t_end = datetime.now()
         print('Time elapsed: ' + str(t_end - t_start))
+
+    print('------------- in main after PCalcs: %s -------------' % str(datetime.now()))
 
     ##diffgroups has dimension of (number of variables, 4, 10, effectsize, samplesize);
     ##number of variables is the input number of columns from the input dataset.
@@ -2284,7 +2308,7 @@ if __name__ == "__main__":
 Modifications to main function to support web ui
 '''    
 def long_running_process(XSRV, num_cols, outcome_type, numberreps, variable_range, effectSizes, sampleSizes, cores, output_folder):
-    print("Starting analysis")
+   
     if (num_cols > 0):
         if (outcome_type == 0 or outcome_type == 2):
  
@@ -2652,7 +2676,7 @@ def main_ui(argv1, argv2, argv3, argv4, argv5, argv6, argv7, results_file):
             argv2 = [int(tmpStr[0]), int(tmpStr[1]) + 1]
         else:
             argv2 = [0, int(argv2)]
-        print('arg 2', argv2)
+        
         
         tmpStr = argv3.split(':')
         argv3 = range(int(tmpStr[0]), int(tmpStr[2]), int(tmpStr[1]))
@@ -2661,7 +2685,7 @@ def main_ui(argv1, argv2, argv3, argv4, argv5, argv6, argv7, results_file):
         if argv3[0] < 1:
              argv3[0] = 1
         argv3 = np.reshape(argv3, (1, len(argv3)))
-        print('arg 3', argv3)
+       
         
         tmpStr = argv4.split(':')
         argv4 = np.arange(float(tmpStr[0]), float(tmpStr[2]), float(tmpStr[1]))
@@ -2669,7 +2693,7 @@ def main_ui(argv1, argv2, argv3, argv4, argv5, argv6, argv7, results_file):
             argv4[0] = 0.05
         argv4 = np.array(argv4)
         argv4 = np.reshape(argv4, (1, len(argv4)))
-        print('arg 4', argv4)
+       
         
         variable_range = argv2
         sampleSizes = argv3  # np.array([[1, 50, 100, 200, 250, 350, 500, 750, 1000]])
@@ -2678,8 +2702,13 @@ def main_ui(argv1, argv2, argv3, argv4, argv5, argv6, argv7, results_file):
         ##define output metric options
         metric_opt = np.array([1, 2, 3, 4])  # see options description below
         correction_opt = np.array([1, 2, 3, 4])  # see correction options description below
+        print('arg 2', argv2)
+        print('arg 3', argv3)
+        print('arg 4', argv4)
+        print('arg 5', argv5) 
+        print('arg 6', argv6)
+        print('arg 7', argv7)
     
-        print('arg 5,6,7', argv5, argv6, argv7)
         numberreps = int(argv5)
         outcome_type = argv6
         # outcome type is a list of options in the UI version

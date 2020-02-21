@@ -1,6 +1,7 @@
 **/user
 *.csv
-papy_output_zip.zip
+nohup.out
+papy_output_zip*
 .pydevproject
 .project
 results/

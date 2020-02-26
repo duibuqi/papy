@@ -256,22 +256,16 @@ def load_data_file(contents, file_name, mod_date):
 
 
 def count_cores(cores):
+    cores = cores.strip()
     real_cores = multiprocessing.cpu_count()
+    print("multiprocessing.cpu_count() returns", str(real_cores))
+    print(cores, "cores were requested")
     try:
-        if len(cores.strip()) > 0:
+        if len(cores) > 0:
             tmpInt = int(cores)      
-            if real_cores - 1 <= 0:
-                cores = '1'
-            else:
-                if tmpInt > real_cores:
-                    cores = str(real_cores)           
-        else:
-            
-            if real_cores - 1 <= 0:
-                cores = '1'
-            else:
-                cores = str(real_cores)
-            
+            if real_cores < tmpInt:
+                print("reducing requested cores to", str(real_cores))
+                cores = str(real_cores)                      
     except ValueError as ve:
         print('Unable to use values for cpu count; returning 1')
         cores = '1'

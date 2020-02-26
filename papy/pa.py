@@ -2352,7 +2352,7 @@ def long_running_process(XSRV, num_cols, outcome_type, numberreps, variable_rang
 
             if (outcome_type == 0 or outcome_type == 2):
                 t = output_folder + '/diffgroups-%s.csv' % (sv_filenames[jj][kk])
-                print(t)
+                #print(t)
                 file_handle = open(t, 'a')
                 title_str = np.append(np.array([['Variables', 'Effect Sizes (Sample Sizes in Columns)']]), sampleSizes.astype('str'), axis=1)
                 np.savetxt(file_handle, title_str, delimiter=',', fmt='%s')
@@ -2618,7 +2618,7 @@ def long_running_process(XSRV, num_cols, outcome_type, numberreps, variable_rang
                 std_diffgroups_array = np.std(temp_diffgroups_array, axis=0)
                 #print('1 - Making html files with some plotting')
                 t = output_folder + '/mean-diffgroups-%s.csv' % (sv_filenames[jj][kk])
-                print(t)
+
                 #print('making file', t)
                 file_handle = open(t, 'a')
                 np.savetxt(file_handle, mean_diffgroups_array, delimiter=",", fmt='%.10f')

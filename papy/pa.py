@@ -2630,7 +2630,6 @@ def long_running_process(XSRV, num_cols, outcome_type, numberreps, variable_rang
                 # for calculating standard deviation
                 std_linearregression_array = np.std(temp_linearregression_array, axis=0)
                 t = output_folder + '/mean-linearregression-%s.csv' % (sv_filenames[jj][kk])
-                print(t)
                 #print('making file', t)
                 file_handle = open(t, 'a')
                 np.savetxt(file_handle, mean_linearregression_array, delimiter=",", fmt='%.10f')

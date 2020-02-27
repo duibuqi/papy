@@ -23,7 +23,6 @@ UPLOAD_DIRECTORY = 'user/'
 external_stylesheets = [
     'https://fonts.googleapis.com/css?family=Nunito+Sans:200,300,400,600,700,800,900',
     'https://fonts.googleapis.com/css?family=Architects+Daughter|Indie+Flower|Rock+Salt&display=swap'
-
 ]
 
 app = dash.Dash(__name__, 
@@ -106,8 +105,7 @@ app.layout = html.Div(className='shadow-panel', children=[
                                                         dcc.Input(id='id_var_repeats', value='10', type="text", className="form-control")
                                                     ])
                                                 ])
-                                            ])
-                                            
+                                            ])                                         
                                         ]),
                                         html.Div(id="please-wait", className="row invisible", children=[ 
                                             html.Div(className='col-md-5'),
@@ -116,7 +114,7 @@ app.layout = html.Div(className='shadow-panel', children=[
                                             ])
                                         ]),
                                         html.Div(className="row", children=[
-                                             html.Div(className="text-right col-md-8", children=[
+                                             html.Div(className="text-right col-md-4", children=[
                                                 html.Div(className="form-group", children=[
                                                     html.Div(className="form-field", children=[ 
                                                         dcc.Checklist(className='col-md-8 papy', id='id_var_analysis',
@@ -129,7 +127,15 @@ app.layout = html.Div(className='shadow-panel', children=[
                                                     )  
                                                     ])                                                      
                                                 ])
-                                            ]),                                                               
+                                            ]),                                               
+                                            html.Div(className="col-md mr-md-2", children=[
+                                                html.Div('Send results to:',className='papy'),
+                                                html.Div(className="form-group", children=[
+                                                    html.Div(className="form-field", children=[                                      
+                                                        dcc.Input(id='id_var_email', value='jms3@ic.ac.uk', type="email", className="form-control")                                               
+                                                    ])
+                                                ])
+                                            ]),                                                             
                                             html.Div(className="col-md-4", children=[
                                                 html.Div(className="form-group row", children=[
                                                     html.Div(className='col-md-6', children=[html.Button('Run analysis', id='submit-button', n_clicks=0, type="submit", className="text-nowrap form-control btn btn-secondary")]),
@@ -276,17 +282,17 @@ def count_cores():
                State('id_var_samples', 'value'),
                State('id_var_effects', 'value'),
                State('id_var_repeats', 'value'),
-               #State('id_var_cpus', 'value'),
+               State('id_var_email', 'value'),
                State('id_var_analysis', 'value'),
                State('store', 'data')
                ])
-def run_analysis(n_clicks,range,samples,effects,repeats,analysis,data):
+def run_analysis(n_clicks,range,samples,effects,repeats,email,analysis,data):
     print('------------- starting run %s -------------' % str(datetime.datetime.now()))
     print('data', data)
     print('range', range)
     print('samples', samples)
     print('effects', effects)
-    
+    print('email', email)
     if n_clicks is not None:
         df = None
         if data is None:
@@ -301,6 +307,7 @@ def run_analysis(n_clicks,range,samples,effects,repeats,analysis,data):
             return (make_download_button(), '', 'Please provide a number of repeats. 10 is worth a try.', post_it('', 'pink'))   
         if len(analysis)==0:
             return (make_download_button(), '', 'Please choose at least one analysis type!', post_it('', 'pink'))
+        
           
         try:
             cpus = count_cores()

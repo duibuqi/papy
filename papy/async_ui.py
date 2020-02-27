@@ -113,8 +113,9 @@ app.layout = html.Div(className='shadow-panel', children=[
                                                 post_it('Please wait; the analysis may take a few minutes...', 'yellow')
                                             ])
                                         ]),
-                                        html.Div(className="row", children=[
-                                             html.Div(className="text-right col-md-4", children=[
+                                        html.Div(className="row no-gutters", children=[
+                                            
+                                             html.Div(className="col-md mr-md-2", children=[
                                                 html.Div(className="form-group", children=[
                                                     html.Div(className="form-field", children=[ 
                                                         dcc.Checklist(className='col-md-8 papy', id='id_var_analysis',
@@ -127,7 +128,8 @@ app.layout = html.Div(className='shadow-panel', children=[
                                                     )  
                                                     ])                                                      
                                                 ])
-                                            ]),                                               
+                                            ]),   
+                                            
                                             html.Div(className="col-md mr-md-2", children=[
                                                 html.Div('Send results to:',className='papy'),
                                                 html.Div(className="form-group", children=[
@@ -135,14 +137,24 @@ app.layout = html.Div(className='shadow-panel', children=[
                                                         dcc.Input(id='id_var_email', value='jms3@ic.ac.uk', type="email", className="form-control")                                               
                                                     ])
                                                 ])
-                                            ]),                                                             
-                                            html.Div(className="col-md-4", children=[
-                                                html.Div(className="form-group row", children=[
-                                                    html.Div(className='col-md-6', children=[html.Button('Run analysis', id='submit-button', n_clicks=0, type="submit", className="text-nowrap form-control btn btn-secondary")]),
-                                                    html.Div(className='col-md-6', id="results-button")
-                                                    
+                                            ]),  
+                                            html.Div(className="col-md mr-md-2", children=[
+                                                html.Div(className='btn btn-primary'),
+                                                html.Div(className="form-group", children=[
+                                                    html.Div(className="form-field", children=[                  
+                                                        html.Button('Run analysis', id='submit-button', n_clicks=0, type="submit", className='text-nowrap form-control btn btn-secondary'),                                                
+                                                    ]),
                                                 ])
-                                            ])
+                                            ]),     
+                                            html.Div(className="col-md mr-md-2", children=[
+                                                html.Div(className='btn btn-primary'),
+                                                html.Div(className="form-group", children=[
+                                                    html.Div(className="form-field", children=[                                                                       
+                                                        html.Div(className='col-md-6', id="results-button")
+                                                    ])
+                                                ])
+                                            ]),                                                           
+                                           
                                         ])
                                     ])
                                 ])

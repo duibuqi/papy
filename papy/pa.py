@@ -959,7 +959,7 @@ def PCalc_2Group(data, EffectSizes, SampSizes, SignThreshold, nSimSamp, nRepeat,
     :type cores: int
     :return:
     """
-    print("In PCalc_2Group()")
+    print("In PCalc_2Group() with cpu count", cores)
     ##If sample size bigger than number of simulated samples adjust it
     ## global sampSizes, signThreshold, effectSizes, numVars, nRepeats, nSampSizes, nEffSizes, Samples_seg, correlationMat_seg, output2
     ## global output2
@@ -1011,11 +1011,16 @@ def PCalc_2Group(data, EffectSizes, SampSizes, SignThreshold, nSimSamp, nRepeat,
     ##define an array for storing the results in each step of repeat for all variables
     ##with all effect sizes and sample sizes;
     output_allsteps_tmp = []
-    ## #debug - using another multiporcessing method to run f_multiproc
+    ## #debug - using another multiprocessing method to run f_multiproc
+    print("passing %s cpus to pool" % cores)
     pool = multiprocessing.Pool(processes=cores)
-    output2 = [pool.apply_async(f_multiproc, args=(
-    sampSizes, signThreshold, effectSizes, numVars, nRepeats, nSampSizes, nEffSizes, Samples_seg, correlationMat_seg,
-    cols, cores, wk)) for wk in range(cores)]
+    print(pool)
+    output2 = [pool.apply_async(f_multiproc, args=(sampSizes, signThreshold, 
+                                                   effectSizes, numVars, 
+                                                   nRepeats, nSampSizes, 
+                                                   nEffSizes, Samples_seg, 
+                                                   correlationMat_seg, 
+                                                   cols, cores, wk)) for wk in range(cores)]
     output2 = [p.get(None) for p in output2]
     output3 = list()
     # Unpack results
@@ -1177,7 +1182,7 @@ def f_multiproc(sampSizes, signThreshold, effectSizes, numVars, nRepeats, nSampS
         """
     ##re-check numVars
   
-    
+    print('f_multiproc with %s of %s cores' % (currCore, cores))
     offSet = currCore * int(round(cols / cores))
     if (currCore < (cores - 1)):
         numVars = int(round(cols / cores))
